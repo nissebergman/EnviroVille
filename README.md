@@ -1,5 +1,5 @@
 # TNM085
-Modellering &amp; Simuleringsprojekt
+## Modellering &amp; Simuleringsprojekt
 
 Vi som jobbar på detta projekt är:
 * [Frans Johansson](https://www.facebook.com/fransoskarjohansson)
