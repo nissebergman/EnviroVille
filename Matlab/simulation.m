@@ -1,6 +1,6 @@
 % Simulation parameters
 t_end = hr2sec(24); % End time of simulation
-h = 1;             % Time step
+h = 1;              % Time step
 
 % Wind turbine parameters
 m = 5000 * 3;       % Mass (three rotor blades)
@@ -11,6 +11,12 @@ C = 0.04;           % Wind resistance coefficient
 rho = 1.25;         % Air density
 B1 = 1000;          % Friction coefficient for omega
 B2 = 350;           % Friction coefficient for omega ^ 2
+
+% Solar panel properties
+sun_intensity = [3360 840 840];
+efficiency = 0.15;
+num_panels = 50;
+solar_E = 0;
 
 % Generator properties
 R = 0.25;           % Generator resistance
@@ -30,6 +36,7 @@ t = 0:h:t_end;
 wind_velocity = wind(length(t), base_wind);
 
 omega_saved = zeros(length(t), 1);
+solar_E_saved = zeros(length(t), 1);
 E_saved = zeros(length(t), 1);
 
 % Simulation loop
@@ -44,6 +51,13 @@ for n = 1:1:length(t)
     omega = euler_solve(omega, h, alpha);
     theta = euler_solve(theta, h, omega);
     
+    % Solar panels
+    time_block = mod(n, hr2sec(8));
+    current_intensity = sun_intensity(time_block);
+    % TODO: Molnighet
+    solar_P = current_intensity * num_panels * efficiency;
+    solar_E = euler_solve(solar_E, h, solar_P);
+    
     % Generator
     i = tau / Ki;
     u = R*i + Ke*omega;
@@ -53,6 +67,7 @@ for n = 1:1:length(t)
     % Save data to plot
     omega_saved(n) = omega;
     E_saved(n) = E;
+    solar_E_saved(n) = solar_E;
 end
 
 figure('NumberTitle', 'off', 'Name', 'Angular velocity of the windmill')
