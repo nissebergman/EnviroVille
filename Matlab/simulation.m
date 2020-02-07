@@ -25,7 +25,7 @@ Ki = 1;             % Torque -> Current (???)
 Ke = 1;             % Back-EMF coefficient (???)
 
 % Initial conditions
-base_wind = 20;
+base_wind = 10;
 omega = 0;          % Angular velocity (of wind turbine)
 theta = 0;          % Angular acceleration (of wind turbine)
 u = 0;              % Voltage (Volts)
@@ -69,11 +69,19 @@ for n = 1:1:length(t)
     E_saved(n) = E;
     solar_E_saved(n) = solar_E;
 end
-
-figure('NumberTitle', 'off', 'Name', 'Angular velocity of the windmill')
+subplot(3,1,1);
+plot(wind_velocity);
+title('Windspeed');
+subplot(3,1,2);
+%figure('NumberTitle', 'off', 'Name', 'Angular velocity of the windmill')
 plot(omega_saved ./ (2*pi), 'b');
-xlim([hr2sec(8) hr2sec(9)])
+title('Angular velocity of the windmill');
+%xlim([hr2sec(8) hr2sec(9)])
+
 %ylim([3 6])
-figure('NumberTitle', 'off','Name', 'Power output of windmill in kWh')
+subplot(3,1,3)
+%figure('NumberTitle', 'off','Name', 'Power output of windmill in kWh')
 plot(E_saved ./ (1000*60*60), 'r');
-xlim([hr2sec(8) hr2sec(9)])
+title('Power output of windmill in kWh');
+%xlim([hr2sec(8) hr2sec(9)])
+
