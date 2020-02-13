@@ -28,7 +28,7 @@ i = 0;              % Current (Amperes)
 wind_E = 0;              % Energy  (Watt seconds)
 
 t = 0:h:t_end;
-wind_velocity = wind(length(t), base_wind);
+wind_velocity = coherent_noise(length(t), base_wind, 10, 10, 5);
 
 %SOLAR POWER
 % Solar panel properties
@@ -38,7 +38,7 @@ efficiency = 0.15;
 num_panels = 50;
 solar_E = 0;
 
-cloudiness = cloud(length(t), 15);
+cloudiness = coherent_noise(length(t), 15, 85, 7200, 5400);
 
 %WATER POWER
 %water properties
@@ -76,7 +76,6 @@ for n = 1:1:length(t)
     % Solar panels
     time_block = mod(floor(n / (hr2sec(8)+1)), 3);
     current_intensity = sun_intensity(time_block+1);
-    % TODO: Molnighet
     
     solar_P = current_intensity * num_panels * efficiency * cloudiness(n);
     solar_E = euler_solve(solar_E, h, solar_P);
@@ -91,6 +90,7 @@ for n = 1:1:length(t)
     solar_E_saved(n) = solar_E;
     water_E_saved(n) = water_E;
 end
+
 subplot(3,1,1);
 plot(wind_velocity);
 title('Windspeed');
