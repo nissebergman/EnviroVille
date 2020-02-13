@@ -35,6 +35,8 @@ E = 0;              % Energy  (Watt seconds)
 t = 0:h:t_end;
 wind_velocity = wind(length(t), base_wind);
 
+%cloudiness = cloud(length(t), 15);
+
 omega_saved = zeros(length(t), 1);
 solar_E_saved = zeros(length(t), 1);
 E_saved = zeros(length(t), 1);
@@ -61,6 +63,7 @@ for n = 1:1:length(t)
     time_block = mod(floor(n / (hr2sec(8)+1)), 3);
     current_intensity = sun_intensity(time_block+1);
     % TODO: Molnighet
+    
     solar_P = current_intensity * num_panels * efficiency;
     solar_E = euler_solve(solar_E, h, solar_P);
 
@@ -84,4 +87,5 @@ subplot(3,1,3)
 plot(E_saved ./ (1000*60*60), 'r');
 title('Power output of windmill in kWh');
 %xlim([hr2sec(8) hr2sec(9)])
+
 
