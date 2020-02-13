@@ -32,8 +32,8 @@ wind_velocity = wind(length(t), base_wind);
 
 %SOLAR POWER
 % Solar panel properties
-sun_intensity = [3360 540 1140];
-%sun_intensity = 1000;
+%sun_intensity = [3360 540 1140];
+sun_intensity = [1000 300 200];
 efficiency = 0.15;
 num_panels = 50;
 solar_E = 0;
@@ -78,7 +78,7 @@ for n = 1:1:length(t)
     current_intensity = sun_intensity(time_block+1);
     % TODO: Molnighet
     
-    solar_P = current_intensity * num_panels * efficiency;
+    solar_P = current_intensity * num_panels * efficiency * cloudiness(n);
     solar_E = euler_solve(solar_E, h, solar_P);
     
     % Water
@@ -110,8 +110,8 @@ title('Power output of windmill in kWh');
 
 %figure('NumberTitle', 'off','Name', 'Power output of windmill in kWh')
 figure
-plot(water_E_saved ./ (1000*60*60), 'b');
-title('Power output from water trubine in kWh');
+plot(solar_E_saved ./ (1000*60*60), 'b');
+title('Power output sun panel in kWh');
 %xlim([hr2sec(8) hr2sec(9)])
 
 

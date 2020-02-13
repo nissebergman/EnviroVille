@@ -1,10 +1,21 @@
 function cloud_data = cloud(length, sun_cloud)
 
+stayPut = 0;
 cloud_data = zeros(1,length);
 
 for n = 1:length
-    clouds = 85*rand(1);
-    cloud_data(n) = sun_cloud + clouds;
+     if (stayPut ~= 0) 
+        cloud_data(n) = cloud_data(n-1);
+        stayPut = stayPut-1;
+    end
+    dice = ceil(10*rand(1));
+    if (dice < 3 && stayPut == 0)
+        clouds = 85*rand(1);
+        cloud_data(n) = sun_cloud + clouds;
+        stayPut = 10-round(rand(1)*5);
+    elseif (stayPut == 0)
+        cloud_data(n) = sun_cloud;
+    end
 end
 
 cloud_data = smoothdata(cloud_data);
