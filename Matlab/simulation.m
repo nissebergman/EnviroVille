@@ -1,7 +1,8 @@
 % Simulation parameters
-t_end = hr2sec(48); % End time of simulation
+t_end = hr2sec(8);  % End time of simulation
 h = 1;              % Time step
 
+%WIND POWER
 % Wind turbine parameters
 m = 5000 * 3;       % Mass (three rotor blades)
 r = 30;             % Radius (length of blade)
@@ -11,12 +12,6 @@ C = 0.04;           % Wind resistance coefficient
 rho = 1.25;         % Air density
 B1 = 1000;          % Friction coefficient for omega
 B2 = 350;           % Friction coefficient for omega ^ 2
-
-% Solar panel properties
-sun_intensity = [3360 540 1140];
-efficiency = 0.15;
-num_panels = 50;
-solar_E = 0;
 
 % Generator properties
 R = 0.25;           % Generator resistance
@@ -30,16 +25,35 @@ omega = 0;          % Angular velocity (of wind turbine)
 theta = 0;          % Angular acceleration (of wind turbine)
 u = 0;              % Voltage (Volts)
 i = 0;              % Current (Amperes)
-E = 0;              % Energy  (Watt seconds)
+wind_E = 0;              % Energy  (Watt seconds)
 
 t = 0:h:t_end;
 wind_velocity = wind(length(t), base_wind);
 
-%cloudiness = cloud(length(t), 15);
+%SOLAR POWER
+% Solar panel properties
+sun_intensity = [3360 540 1140];
+%sun_intensity = 1000;
+efficiency = 0.15;
+num_panels = 50;
+solar_E = 0;
 
+cloudiness = cloud(length(t), 15);
+
+%WATER POWER
+%water properties
+N = 0.90;       % Turbinens verkningsgrad (Ofta kring 90%)
+Rho = 997;      % Water density (kg/m^3)
+Q = 45;         % Installerad turbinvattenf?ring i kubikmeter/sekund
+g = 9.82;       % Gravity
+H = 10;         % Fallh?jd ?ver turbinen
+water_E = 0;
+
+%saved values to be plotted
 omega_saved = zeros(length(t), 1);
 solar_E_saved = zeros(length(t), 1);
-E_saved = zeros(length(t), 1);
+wind_E_saved = zeros(length(t), 1);
+water_E_saved = zeros(length(t), 1);
 
 % Simulation loop
 for n = 1:1:length(t)
@@ -57,7 +71,7 @@ for n = 1:1:length(t)
     i = tau / Ki;
     u = R*i + Ke*omega;
     P = u*i;
-    E = euler_solve(E, h, P);
+    wind_E = euler_solve(wind_E, h, P);
     
     % Solar panels
     time_block = mod(floor(n / (hr2sec(8)+1)), 3);
@@ -66,15 +80,21 @@ for n = 1:1:length(t)
     
     solar_P = current_intensity * num_panels * efficiency;
     solar_E = euler_solve(solar_E, h, solar_P);
+    
+    % Water
+    water_P = N * Rho * Q * g * H; %Ekvation f?r vattenkraft
+    water_E = euler_solve(water_E, h, water_P);
 
     % Save data to plot
     omega_saved(n) = omega;
-    E_saved(n) = E;
+    wind_E_saved(n) = wind_E;
     solar_E_saved(n) = solar_E;
+    water_E_saved(n) = water_E;
 end
 subplot(3,1,1);
 plot(wind_velocity);
 title('Windspeed');
+
 subplot(3,1,2);
 %figure('NumberTitle', 'off', 'Name', 'Angular velocity of the windmill')
 plot(omega_saved ./ (2*pi), 'b');
@@ -84,8 +104,14 @@ title('Angular velocity of the windmill');
 %ylim([3 6])
 subplot(3,1,3)
 %figure('NumberTitle', 'off','Name', 'Power output of windmill in kWh')
-plot(E_saved ./ (1000*60*60), 'r');
+plot(wind_E_saved ./ (1000*60*60), 'r');
 title('Power output of windmill in kWh');
+%xlim([hr2sec(8) hr2sec(9)])
+
+%figure('NumberTitle', 'off','Name', 'Power output of windmill in kWh')
+figure
+plot(water_E_saved ./ (1000*60*60), 'b');
+title('Power output from water trubine in kWh');
 %xlim([hr2sec(8) hr2sec(9)])
 
 
