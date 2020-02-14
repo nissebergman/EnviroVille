@@ -6,8 +6,8 @@ var renderer = new THREE.WebGLRenderer({
 	antialias : true,
 	shadowMap : true
 	});
-renderer.setClearColor(new THREE.Color("lightgrey"), 1),
-renderer.setSize (window.innerWidth, window.innerHeight),
+renderer.setClearColor(new THREE.Color("lightgrey"), 1);
+renderer.setSize (window.innerWidth, window.innerHeight);
 
 //Stick renderer to document body
 document.body.appendChild(renderer.domElement);
@@ -27,20 +27,27 @@ var camera = new THREE.PerspectiveCamera(45,
 	window.innerWidth / window.innerHeight, 0.1, 20000 ); //FOV, Aspect Ratio, Near-clipping, Far-clipping
 var controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.update();
-camera.position.z = 30;
+camera.position.z = 20;
+camera.position.y = 5;
+
+//scene.rotation.y = -25 * (Math.PI/180);
 
 /////////////////////////////////////////////////////
 //				Init objects	   		  		   //
 /////////////////////////////////////////////////////
 var world;
 var table;
+var roomSize = 20;
+const textureFolder = "/Assets/Textures/";
+const skyboxFolder = "/Assets/Textures/skybox/"
+
 
 
 
 /////////////////////////////////////////////////////
 //				Object Properties	   		   	   //
 /////////////////////////////////////////////////////
-var floorGeometry = new THREE.PlaneGeometry( 15, 15, 2, 2 );
+var floorGeometry = new THREE.PlaneGeometry( roomSize, roomSize, 2, 2 );
 var floorMaterial = new THREE.MeshStandardMaterial( {
 	roughness: 0.8,
 	metalness: 0.2,
@@ -56,27 +63,56 @@ floor.recieveShadow = true;
 /////////////////////////////////////////////////////
 //				Load textures	   		 		   //
 /////////////////////////////////////////////////////
-textureLoader.load("Assets/Textures/floor_diffuse.jpg", function( map ){
+
+ let roomArray = [];
+ let texture_ft = new THREE.TextureLoader().load(skyboxFolder + 'px.png');
+ let texture_bk = new THREE.TextureLoader().load(skyboxFolder + 'nx.png');
+ let texture_up = new THREE.TextureLoader().load(skyboxFolder + 'py.png');
+ let texture_dn = new THREE.TextureLoader().load(skyboxFolder + 'ny.png');
+ let texture_rt = new THREE.TextureLoader().load(skyboxFolder + 'pz.png');
+ let texture_lf = new THREE.TextureLoader().load(skyboxFolder + 'nz.png');
+
+roomArray.push(new THREE.MeshBasicMaterial( { map: texture_ft }));
+roomArray.push(new THREE.MeshBasicMaterial( { map: texture_bk }));
+roomArray.push(new THREE.MeshBasicMaterial( { map: texture_up }));
+roomArray.push(new THREE.MeshBasicMaterial( { map: texture_dn }));
+roomArray.push(new THREE.MeshBasicMaterial( { map: texture_rt }));
+roomArray.push(new THREE.MeshBasicMaterial( { map: texture_lf }));
+
+
+for (let i = 0; i < 6; i++) roomArray[i].side = THREE.BackSide;
+ 
+var skyBoxGeo = new THREE.BoxGeometry(roomSize,roomSize,roomSize);
+var skyBoxMat = new THREE.MeshBasicMaterial( {color: 0x000fff} );
+skyBoxMat.side = THREE.BackSide;
+let skyBox = new THREE.Mesh(skyBoxGeo,roomArray);
+skyBox.position.y = roomSize/2-0.1;
+scene.add(skyBox);
+
+textureLoader.load(textureFolder + "floor_diffuse.jpg", function( map ){
 	map.wrapS = THREE.RepeatWrapping;
 	map.wrapT = THREE.RepeatWrapping;
+	map.anisotropy = 8;
 	map.repeat.set( 4, 4 );
 	floorMaterial.map = map;
 	floorMaterial.needsUpdate = true;
 
 });
 
-textureLoader.load("Assets/Textures/floor_bump.jpg", function( map ){
+textureLoader.load(textureFolder + "floor_bump.jpg", function( map ){
 	map.wrapS = THREE.RepeatWrapping;
 	map.wrapT = THREE.RepeatWrapping;
+	map.anisotropy = 8;
 	map.repeat.set( 4, 4 );
 	floorMaterial.bumpMap = map;
 	floorMaterial.needsUpdate = true;
 
 });
 
-textureLoader.load("Assets/Textures/floor_roughness.jpg", function( map ){
+textureLoader.load(textureFolder + "floor_roughness.jpg", function( map ){
 	map.wrapS = THREE.RepeatWrapping;
 	map.wrapT = THREE.RepeatWrapping;
+	map.anisotropy = 8;
 	map.repeat.set( 4, 4 );
 	floorMaterial.roughnessMap = map;
 	floorMaterial.needsUpdate = true;
@@ -162,7 +198,6 @@ window.addEventListener('resize', function(){
 
 // Real simple loop, put animations inside 
 var animate = function () {
-
 	requestAnimationFrame(animate);
 	renderer.render(scene,camera);
 }
