@@ -1,5 +1,5 @@
 % Simulation parameters
-t_end = hr2sec(8);  % End time of simulation
+t_end = hr2sec(1);  % End time of simulation
 h = 1;              % Time step
 
 % WIND POWER
@@ -10,8 +10,7 @@ A = r ^ 2 * pi;     % Area
 J = m * r^2 / 3;    % Moment of inertia (approx. thin rod)
 C = 0.04;           % Wind resistance coefficient
 rho = 1.25;         % Air density
-B1 = 1000;          % Friction coefficient for omega
-B2 = 350;           % Friction coefficient for omega ^ 2
+tsr = 8;            % Tip-to-speed ratio, 8 corresponding roughly to optimal Cp
 
 % Generator properties
 R = 0.25;           % Generator resistance
@@ -25,7 +24,7 @@ omega = 0;          % Angular velocity (of wind turbine)
 theta = 0;          % Angular acceleration (of wind turbine)
 u = 0;              % Voltage (Volts)
 i = 0;              % Current (Amperes)
-wind_E = 0;              % Energy  (Watt seconds)
+wind_E = 0;         % Energy  (Watt seconds)
 
 t = 0:h:t_end;
 wind_velocity = coherent_noise(length(t), base_wind, 10, 10, 5);
@@ -58,10 +57,10 @@ water_E_saved = zeros(length(t), 1);
 % Simulation loop
 for n = 1:1:length(t)
     % Wind turbine
-    friction = B1 * omega + B2 * omega ^ 2;
+    breaking_force = windmill_controller(omega, wind_velocity(n)*tsr/r);
     wind_force = 0.5 * rho * C * A * wind_velocity(n)^2;
     wind_torque = wind_force * r/2;
-    tau = wind_torque - friction;
+    tau = wind_torque - breaking_force*r;
     
     alpha = tau / J ;
     omega = euler_solve(omega, h, alpha);
@@ -91,28 +90,31 @@ for n = 1:1:length(t)
     water_E_saved(n) = water_E;
 end
 
-% Do plots
-subplot(3,1,1);
-plot(wind_velocity);
-title('Windspeed');
-
-subplot(3,1,2);
-%figure('NumberTitle', 'off', 'Name', 'Angular velocity of the windmill')
+figure('NumberTitle', 'off', 'Name', 'Angular velocity of the windmill')
 plot(omega_saved ./ (2*pi), 'b');
-title('Angular velocity of the windmill');
-%xlim([hr2sec(8) hr2sec(9)])
 
-%ylim([3 6])
-subplot(3,1,3)
-%figure('NumberTitle', 'off','Name', 'Power output of windmill in kWh')
-plot(wind_E_saved ./ (1000*60*60), 'r');
-title('Power output of windmill in kWh');
-%xlim([hr2sec(8) hr2sec(9)])
-
-%figure('NumberTitle', 'off','Name', 'Power output of windmill in kWh')
-figure
-plot(solar_E_saved ./ (1000*60*60), 'b');
-title('Power output sun panel in kWh');
-%xlim([hr2sec(8) hr2sec(9)])
+% Do plots
+% subplot(3,1,1);
+% plot(wind_velocity);
+% title('Windspeed');
+% 
+% subplot(3,1,2);
+% %figure('NumberTitle', 'off', 'Name', 'Angular velocity of the windmill')
+% plot(omega_saved ./ (2*pi), 'b');
+% title('Angular velocity of the windmill');
+% %xlim([hr2sec(8) hr2sec(9)])
+% 
+% %ylim([3 6])
+% subplot(3,1,3)
+% %figure('NumberTitle', 'off','Name', 'Power output of windmill in kWh')
+% plot(wind_E_saved ./ (1000*60*60), 'r');
+% title('Power output of windmill in kWh');
+% %xlim([hr2sec(8) hr2sec(9)])
+% 
+% %figure('NumberTitle', 'off','Name', 'Power output of windmill in kWh')
+% figure
+% plot(solar_E_saved ./ (1000*60*60), 'b');
+% title('Power output sun panel in kWh');
+% %xlim([hr2sec(8) hr2sec(9)])
 
 
