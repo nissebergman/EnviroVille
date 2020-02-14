@@ -2,7 +2,7 @@
 t_end = hr2sec(8);  % End time of simulation
 h = 1;              % Time step
 
-%WIND POWER
+% WIND POWER
 % Wind turbine parameters
 m = 5000 * 3;       % Mass (three rotor blades)
 r = 30;             % Radius (length of blade)
@@ -30,9 +30,9 @@ wind_E = 0;              % Energy  (Watt seconds)
 t = 0:h:t_end;
 wind_velocity = coherent_noise(length(t), base_wind, 10, 10, 5);
 
-%SOLAR POWER
+% SOLAR POWER
 % Solar panel properties
-%sun_intensity = [3360 540 1140];
+% sun_intensity = [3360 540 1140];
 sun_intensity = [1000 300 200];
 efficiency = 0.15;
 num_panels = 50;
@@ -40,8 +40,8 @@ solar_E = 0;
 
 cloudiness = coherent_noise(length(t), 15, 85, 7200, 5400);
 
-%WATER POWER
-%water properties
+% WATER POWER
+% Water properties
 N = 0.90;       % Turbinens verkningsgrad (Ofta kring 90%)
 Rho = 997;      % Water density (kg/m^3)
 Q = 45;         % Installerad turbinvattenf?ring i kubikmeter/sekund
@@ -49,7 +49,7 @@ g = 9.82;       % Gravity
 H = 10;         % Fallh?jd ?ver turbinen
 water_E = 0;
 
-%saved values to be plotted
+% Saved values to be plotted
 omega_saved = zeros(length(t), 1);
 solar_E_saved = zeros(length(t), 1);
 wind_E_saved = zeros(length(t), 1);
@@ -91,6 +91,7 @@ for n = 1:1:length(t)
     water_E_saved(n) = water_E;
 end
 
+% Do plots
 subplot(3,1,1);
 plot(wind_velocity);
 title('Windspeed');
