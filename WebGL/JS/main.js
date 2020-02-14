@@ -3,7 +3,8 @@
 /////////////////////////////////////////////////////
 //Init renderer
 var renderer = new THREE.WebGLRenderer({
-	antialias : true
+	antialias : true,
+	shadowMap : true
 	});
 renderer.setClearColor(new THREE.Color("lightgrey"), 1),
 renderer.setSize (window.innerWidth, window.innerHeight),
@@ -15,7 +16,10 @@ document.body.appendChild(renderer.domElement);
 //var onRenderFcts = [];
 
 //Init object loader (For importing .gltf blender files)
-var loader = new THREE.GLTFLoader();
+var objectLoader = new THREE.GLTFLoader();
+
+//Init texture loader
+var textureLoader = new THREE.TextureLoader();
 
 //Init scene and movable camera with OrbitControls
 var scene = new THREE.Scene();
@@ -26,12 +30,89 @@ controls.update();
 camera.position.z = 30;
 
 /////////////////////////////////////////////////////
+//				Init objects	   		  		   //
+/////////////////////////////////////////////////////
+var world;
+var table;
+
+
+
+/////////////////////////////////////////////////////
+//				Object Properties	   		   	   //
+/////////////////////////////////////////////////////
+var floorGeometry = new THREE.PlaneGeometry( 15, 15, 2, 2 );
+var floorMaterial = new THREE.MeshStandardMaterial( {
+	roughness: 0.8,
+	metalness: 0.2,
+	bumpScale: 0.0005,
+	color: 0xffffff,
+	specular: 0xFFFFE5
+});
+var floor = new THREE.Mesh(floorGeometry,floorMaterial);
+floor.material.side = THREE.DoubleSide;
+floor.rotation.x = 90 * (Math.PI/180);
+floor.recieveShadow = true;
+
+/////////////////////////////////////////////////////
+//				Load textures	   		 		   //
+/////////////////////////////////////////////////////
+textureLoader.load("Assets/Textures/floor_diffuse.jpg", function( map ){
+	map.wrapS = THREE.RepeatWrapping;
+	map.wrapT = THREE.RepeatWrapping;
+	map.repeat.set( 4, 4 );
+	floorMaterial.map = map;
+	floorMaterial.needsUpdate = true;
+
+});
+
+textureLoader.load("Assets/Textures/floor_bump.jpg", function( map ){
+	map.wrapS = THREE.RepeatWrapping;
+	map.wrapT = THREE.RepeatWrapping;
+	map.repeat.set( 4, 4 );
+	floorMaterial.bumpMap = map;
+	floorMaterial.needsUpdate = true;
+
+});
+
+textureLoader.load("Assets/Textures/floor_roughness.jpg", function( map ){
+	map.wrapS = THREE.RepeatWrapping;
+	map.wrapT = THREE.RepeatWrapping;
+	map.repeat.set( 4, 4 );
+	floorMaterial.roughnessMap = map;
+	floorMaterial.needsUpdate = true;
+
+});
+
+
+/////////////////////////////////////////////////////
 //				Add objects to scene	   		   //
 /////////////////////////////////////////////////////
+scene.add(floor);
 
-loader.load(
-	'/Assets/world.gltf',
+objectLoader.load(
+	'/Assets/Models/world.gltf',
 	function(gltf) {
+		world = gltf.scene;
+		world.castShadow = true;
+		world.position.set(0,0.75,0);
+		scene.add(gltf.scene);
+		gtlf.scene;
+		gltf.cameras;
+		gltf.asset;
+	},
+	function (xhr) {
+		console.log((xhr.loader / xhr.total * 100) + '% loaded');
+	},
+	function (error) {
+		console.log("Error loading objects!");
+});
+
+objectLoader.load(
+	'/Assets/Models/table.gltf',
+	function(gltf) {
+		table = gltf.scene;
+		table.scale.set(1.5,1.5,1.5);
+		table.castShadow = true;
 		scene.add(gltf.scene);
 		gtlf.scene;
 		gltf.cameras;
@@ -48,14 +129,21 @@ loader.load(
 //				Add lights & shadows to scene	   //
 /////////////////////////////////////////////////////
 
-// Ambient light not needed in sunlight
+// Ambient light
 // var ambientLight = new THREE.AmbientLight (0x404040, 1);
 // scene.add(ambientLight);
 
-var sunLight = new THREE.DirectionalLight ( 0xffffff, 2);
-sunLight.castShadow = true;
-sunLight.position = (5,20,0);
-scene.add (sunLight);
+// Sunlight, not needed indoors
+// var sunLight = new THREE.DirectionalLight ( 0xffffff, 1);
+// sunLight.castShadow = true;
+// sunLight.position = (5,20,0);
+// scene.add (sunLight);
+
+// Pointlight
+var lightBulb = new THREE.PointLight(0xffffff,1.2,100);
+lightBulb.position.set(0,10,0);
+lightBulb.decay = 5;
+scene.add(lightBulb);
 
 //Shadows, unsure about these
 // renderer.shadowMap.enabled = true,
@@ -74,11 +162,11 @@ window.addEventListener('resize', function(){
 
 // Real simple loop, put animations inside 
 var animate = function () {
+
 	requestAnimationFrame(animate);
 	renderer.render(scene,camera);
 }
 animate();
-
 
 // More "krånglig" renderingsloop, not sure if better
 // onRenderFcts.push(function(){
