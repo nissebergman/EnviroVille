@@ -1,5 +1,5 @@
 % Simulation parameters
-t_end = hr2sec(1);  % End time of simulation
+t_end = hr2sec(24);  % End time of simulation
 h = 1;              % Time step
 t = 0:h:t_end;      % Time vector
 
@@ -32,7 +32,7 @@ wind_velocity = coherent_noise(length(t), base_wind, 10, 10, 5);
 % SOLAR POWER
 % Solar panel properties
 % sun_intensity = [3360 540 1140];
-sun_intensity = [1000 300 200];
+sun_intensity = sunlight(hr2sec(6), hr2sec(18), hr2sec(12), 1000);
 efficiency = 0.15;
 num_panels = 50;
 solar_E = 0;
@@ -73,8 +73,7 @@ for n = 1:1:length(t)
     wind_E = euler_solve(wind_E, h, P);
     
     % Solar panels
-    time_block = mod(floor(n / (hr2sec(8)+1)), 3);
-    current_intensity = sun_intensity(time_block+1);
+    current_intensity = sun_intensity(n) * cloudiness(n)/100;
     
     solar_P = current_intensity * num_panels * efficiency * cloudiness(n);
     solar_E = euler_solve(solar_E, h, solar_P);
@@ -89,6 +88,9 @@ for n = 1:1:length(t)
     solar_E_saved(n) = solar_E;
     water_E_saved(n) = water_E;
 end
+
+figure('NumberTitle', 'off', 'Name', 'Power output sun panel in kWh')
+plot(solar_E_saved ./ (1000*60*60), 'b');
 
 % Do plots
 % subplot(3,1,1);
