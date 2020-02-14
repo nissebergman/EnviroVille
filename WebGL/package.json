@@ -1,0 +1,19 @@
+{
+  "name": "tn085",
+  "version": "1.0.0",
+  "description": "Hej!",
+  "main": "index.js",
+  "scripts": {
+  "start": "index.html"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/nissebergman/tn085.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nissebergman/tn085/issues"
+  },
+  "homepage": "https://github.com/nissebergman/tn085#readme"
+}
