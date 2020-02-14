@@ -1,6 +1,7 @@
 % Simulation parameters
 t_end = hr2sec(1);  % End time of simulation
 h = 1;              % Time step
+t = 0:h:t_end;      % Time vector
 
 % WIND POWER
 % Wind turbine parameters
@@ -26,7 +27,6 @@ u = 0;              % Voltage (Volts)
 i = 0;              % Current (Amperes)
 wind_E = 0;         % Energy  (Watt seconds)
 
-t = 0:h:t_end;
 wind_velocity = coherent_noise(length(t), base_wind, 10, 10, 5);
 
 % SOLAR POWER
@@ -89,9 +89,6 @@ for n = 1:1:length(t)
     solar_E_saved(n) = solar_E;
     water_E_saved(n) = water_E;
 end
-
-figure('NumberTitle', 'off', 'Name', 'Angular velocity of the windmill')
-plot(omega_saved ./ (2*pi), 'b');
 
 % Do plots
 % subplot(3,1,1);
