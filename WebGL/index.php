@@ -7,10 +7,11 @@
     <script src='JS/OrbitControls.js'></script>
     <script src='JS/GLTFLoader.js'></script>
     <script src='Extern/noisejs/perlin.js'></script>
-    <link rel="stylesheet" href="style/style.css">
+    <link rel="stylesheet" href="Style/style.css">
 </head>
 
 <body>
+
     <script src="JS/main.js"></script>
 </body>
 
