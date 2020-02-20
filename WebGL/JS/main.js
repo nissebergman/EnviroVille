@@ -34,7 +34,13 @@ var camera = new THREE.PerspectiveCamera(
 var controls = new THREE.OrbitControls(camera, renderer.domElement);
 camera.position.z = 15;
 camera.position.y = 9;
+controls.target = new THREE.Vector3(0,2.2,0);
 controls.update();
+
+//Init graph for FPS, or wind.
+var stats = new Stats();
+stats.showPanel(0);
+document.body.appendChild(stats.dom);
 
 /////////////////////////////////////////////////////
 //				Init objects	   		  		   //
@@ -122,7 +128,14 @@ objectLoader.load("/Assets/Models/world.gltf", function(gltf) {
 	gtlf.scene;
 	gltf.cameras;
 	gltf.asset;
-});
+},
+
+	function ( xhr ) {
+	},
+	// called when loading has errors, is HAXXED
+	function ( error ) {
+	}
+);
 
 objectLoader.load("/Assets/Models/table.gltf", function(gltf) {
 	table = gltf.scene;
@@ -132,7 +145,34 @@ objectLoader.load("/Assets/Models/table.gltf", function(gltf) {
 	gtlf.scene;
 	gltf.cameras;
 	gltf.asset;
-});
+},
+
+	function ( xhr, error ) {
+
+	},
+	// called when loading has errors, is HAXXED
+	function ( error ) {
+
+	}
+);
+
+objectLoader.load("/Assets/Models/water.gltf", function(gltf) {
+	water = gltf.scene;
+	water.position.set(0, 0.75, 0);
+	scene.add(gltf.scene);
+	gtlf.scene;
+	gltf.cameras;
+	gltf.asset;
+},
+
+	function ( xhr, error ) {
+
+	},
+	// called when loading has errors, is HAXXED
+	function ( error ) {
+
+	}
+);
 
 /////////////////////////////////////////////////////
 //				Add lights & shadows to scene	   //
@@ -142,18 +182,19 @@ objectLoader.load("/Assets/Models/table.gltf", function(gltf) {
 // var ambientLight = new THREE.AmbientLight (0x404040, 1);
 // scene.add(ambientLight);
 
-// Pointlight
-// var lightBulb = new THREE.PointLight(0xffffff,200,20,2.1);
-// lightBulb.position.set(0,10,0);
-// lightBulb.castShadow = true;
-// scene.add(lightBulb);
-
 // Sunlight
 sunLight = new THREE.PointLight(0xffee88, 30, 100, 2); //(Color, Intensity, Distance, Decay)
 
 //Append sun "orb" to sunlight
 sunLight.add(new THREE.Mesh(sunGeometry, sunMaterial));
-sunLight.position.set(0, 4, 0);
+setSun = (x, y, z, intensity) => {
+ sunLight.position.set(x, y, z);
+ sunLight.intensity = intensity;
+ sunMaterial.emissiveIntensity = intensity;
+ sunMaterial.needsUpdate = true;
+}
+
+setSun(-0.2, 3.5, 0, 30); //Set default morning sun position
 sunLight.castShadow = true;
 sunLight.shadow.camera.near = 1;
 sunLight.shadow.camera.far = 60;
@@ -219,6 +260,35 @@ class WindMillModel extends Model {
 }
 
 /////////////////////////////////////////////////////
+//				Scene Functionality	   		   	   //
+/////////////////////////////////////////////////////
+
+var timeOfDay = (day) => {
+
+	time = day.toLowerCase();
+	switch(time) {
+		case "day":
+			console.log("It's day!");
+			setSun(-0.2, 3.5, 0, 30);
+			//setWind(day)
+			break;
+		case "evening":
+			console.log("It's evening!");
+			setSun(1.2, 3.3, 0,10);
+			//setWind(day)
+			break;
+		case "night":
+			console.log("It's nighttime!");
+			setSun(day);
+			//setWind(day)
+			break;
+		default:
+			console.log("Invalid time of day!");
+	}
+}
+
+
+/////////////////////////////////////////////////////
 //				Update scene 	   		   		   //
 /////////////////////////////////////////////////////
 
@@ -228,6 +298,7 @@ let windMill = new WindMillModel(5000 * 3, 30, 0.04, 1.25);
 
 const update = dt => {
 	// Handle simulation logic here, dt = time since last update
+
 };
 
 /////////////////////////////////////////////////////
@@ -250,9 +321,27 @@ window.addEventListener(
 // Real simple loop, put animations inside
 let last_time = 0;
 
-var animate = function() {
+var coords = { x: 0, y: 0, z: 0};
+var tween = new TWEEN.Tween(coords)
+		.to({ x: 100, y: 100, z: 100}, 1000)
+		.onUpdate(function() {
+			console.log(this.x, this.y, this.z);
+		})
+		.start();
+		
+
+var animate = () => {
+	
+	stats.begin(); // Start counting stats
+
+	controls.update();
+
 	renderer.shadowMap.enabled = true;
 	sunLight.castShadow = true;
+
+
+
+	TWEEN.update();
 	requestAnimationFrame(animate);
 	renderer.render(scene, camera);
 
@@ -262,6 +351,10 @@ var animate = function() {
 	update(dt);
 
 	last_time = time_now;
+
+
+
+	stats.end(); // Stop counting stats
 };
 animate();
 
