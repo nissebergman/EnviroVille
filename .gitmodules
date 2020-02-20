@@ -1,0 +1,3 @@
+[submodule "WebGL/Extern/noisejs"]
+	path = WebGL/Extern/noisejs
+	url = https://github.com/josephg/noisejs.git
