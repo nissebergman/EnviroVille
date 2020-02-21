@@ -45,7 +45,7 @@ THREE.OrbitControls = function ( object, domElement ) {
 
 	// Limits to how far you can dolly in and out
 	this.minDistance = 0;
-	this.maxDistance = 30;
+	this.maxDistance = 20;
 
 	// Set to true to disable this control
 	this.noRotate = false;
