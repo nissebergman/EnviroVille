@@ -1,6 +1,8 @@
 /////////////////////////////////////////////////////
 //						Init 					   //
 /////////////////////////////////////////////////////
+//Import dependencies
+
 //Init renderer
 var renderer = new THREE.WebGLRenderer({
 	antialias: true
@@ -45,7 +47,7 @@ document.body.appendChild(stats.dom);
 /////////////////////////////////////////////////////
 //				Init objects	   		  		   //
 /////////////////////////////////////////////////////
-var sunGeometry, sunMaterial, floorGeometry, floorMaterial;
+var sunGeometry, sunMaterial, sunLight, floorGeometry, floorMaterial;
 
 var floor, world, table;
 
@@ -364,6 +366,10 @@ const update = dt => {
 };
 
 /////////////////////////////////////////////////////
+//				Init GUI	   		  		       //
+/////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////
 //				Render scene	   		   		   //
 /////////////////////////////////////////////////////
 
@@ -384,12 +390,6 @@ window.addEventListener(
 let last_time = 0;
 
 var coords = { x: 0, y: 0, z: 0 };
-var tween = new TWEEN.Tween(coords)
-	.to({ x: 100, y: 100, z: 100 }, 1000)
-	.onUpdate(function() {
-		console.log(this.x, this.y, this.z);
-	})
-	.start();
 
 var animate = () => {
 	stats.begin(); // Start counting stats
@@ -399,7 +399,6 @@ var animate = () => {
 	renderer.shadowMap.enabled = true;
 	sunLight.castShadow = true;
 
-	TWEEN.update();
 	requestAnimationFrame(animate);
 	renderer.render(scene, camera);
 
