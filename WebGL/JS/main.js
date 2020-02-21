@@ -362,7 +362,7 @@ const update = dt => {
 	// Update tick on each model
 	needsUpdate.forEach(model => model.update(dt / 1000));
 	// Do things with values from the models
-	console.log(dt);
+	// console.log(windMill.getVel());
 };
 
 /////////////////////////////////////////////////////
@@ -387,7 +387,7 @@ window.addEventListener(
 );
 
 // Real simple loop, put animations inside
-let last_time = 0;
+let lastTime = Date.now();
 
 var coords = { x: 0, y: 0, z: 0 };
 
@@ -403,11 +403,11 @@ var animate = () => {
 	renderer.render(scene, camera);
 
 	// Handle simulation updates
-	let time_now = Date.now();
-	let dt = time_now - last_time;
+	let timeNow = Date.now();
+	let dt = timeNow - lastTime;
 	update(dt);
 
-	last_time = time_now;
+	lastTime = timeNow;
 
 	stats.end(); // Stop counting stats
 };
