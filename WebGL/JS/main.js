@@ -36,6 +36,7 @@ var controls = new THREE.OrbitControls(camera, renderer.domElement);
 camera.position.z = 15;
 camera.position.y = 9;
 controls.target = new THREE.Vector3(0,2.5,0);
+
 controls.update();
 
 //Init graph for FPS, or wind.
@@ -129,6 +130,7 @@ scene.add(floor);
 /////////////////////////////////////////////////////
 //		 Import and add objects to scene	       //
 /////////////////////////////////////////////////////
+
 objectLoader.load("/Assets/Models/world.gltf", function(gltf) {
 	world = gltf.scene;
 	world.castShadow = true;
@@ -140,29 +142,29 @@ objectLoader.load("/Assets/Models/world.gltf", function(gltf) {
 },
 
 	function ( xhr ) {
+
 	},
+
+	function(xhr) {},
 	// called when loading has errors, is HAXXED
-	function ( error ) {
-	}
+	function(error) {}
 );
 
-objectLoader.load("/Assets/Models/table.gltf", function(gltf) {
-	table = gltf.scene;
-	table.scale.set(1.5, 1.5, 1.5);
-	table.castShadow = true;
-	scene.add(gltf.scene);
-	gtlf.scene;
-	gltf.cameras;
-	gltf.asset;
-},
-
-	function ( xhr, error ) {
-
+objectLoader.load(
+	"/Assets/Models/table.gltf",
+	function(gltf) {
+		table = gltf.scene;
+		table.scale.set(1.5, 1.5, 1.5);
+		table.castShadow = true;
+		scene.add(gltf.scene);
+		gtlf.scene;
+		gltf.cameras;
+		gltf.asset;
 	},
-	// called when loading has errors, is HAXXED
-	function ( error ) {
 
-	}
+	function(xhr, error) {},
+	// called when loading has errors, is HAXXED
+	function(error) {}
 );
 
 objectLoader.load("/Assets/Models/water.gltf", function(gltf) {
@@ -174,13 +176,9 @@ objectLoader.load("/Assets/Models/water.gltf", function(gltf) {
 	gltf.asset;
 },
 
-	function ( xhr, error ) {
-
-	},
+	function(xhr) {},
 	// called when loading has errors, is HAXXED
-	function ( error ) {
-
-	}
+	function(error) {}
 );
 
 /////////////////////////////////////////////////////
@@ -188,8 +186,8 @@ objectLoader.load("/Assets/Models/water.gltf", function(gltf) {
 /////////////////////////////////////////////////////
 
 // Ambient light
-// var ambientLight = new THREE.AmbientLight (0x404040, 1);
-// scene.add(ambientLight);
+var ambientLight = new THREE.AmbientLight(0x404040, 10);
+scene.add(ambientLight);
 
 // Sunlight
 sunLight = new THREE.PointLight(0xffee88, 30, 100, 2); //(Color, Intensity, Distance, Decay)
@@ -204,11 +202,11 @@ scene.add(moonLight);
 
 
 setSun = (x, y, z, intensity) => {
- sunLight.position.set(x, y, z);
- sunLight.intensity = intensity;
- sunMaterial.emissiveIntensity = intensity;
- sunMaterial.needsUpdate = true;
-}
+	sunLight.position.set(x, y, z);
+	sunLight.intensity = intensity;
+	sunMaterial.emissiveIntensity = intensity;
+	sunMaterial.needsUpdate = true;
+};
 
 setSun(-0.2, params.sunHeight, 0, 30); //Set default morning sun position
 sunLight.castShadow = true;
@@ -231,50 +229,111 @@ class Wind {
 
 		this.x = 0;
 		this.y = 0;
+
+		this.windSpeed = baseWind + variation * noise.simplex2(this.x, this.y);
 	}
 
-	update = dt => {
-		this.x += dt * speed;
-		this.y += dt * speed;
-
-		return baseWind + variation * noise.simplex2(this.x, this.y);
-	};
+	// TODO: Borde kanske inte bero på dt ändå
+	update(dt) {
+		this.x += dt * this.speed;
+		this.y += dt * this.speed;
+	}
 }
 
-// TODO: Fundera på hur Euler-lösaren solve(expr)(dt) borde funka
-class Model {
-	constructor() {
-		// Initial values
-		this.acc = 0;
-		this.vel = 0;
-		this.pos = 0;
-	}
-
+class EulerModel {
 	// Någon slags Euler-lösare
-	solve = expression => dt => {
-		this.acc = expression;
-		this.vel = this.vel + this.acc * dt;
-		this.pos = this.pos + this.vel * dt;
-	};
+	solve(previousValue, expression, dt) {
+		return previousValue + expression * dt;
+	}
 }
 
-// TODO: Lägg till generatormodell som separat klass, eventuellt med arv från denna: WindMill --> WindMillGenerator
-class WindMillModel extends Model {
-	constructor(mass, r, C, rho) {
+class RotatorModel extends EulerModel {
+	constructor() {
 		super();
+		// Initial values
+		this.pos = 0;
+		this.vel = 0;
+	}
+
+	getVel() {
+		return this.vel;
+	}
+
+	solve(accExpr, dt) {
+		this.vel = super.solve(this.vel, accExpr, dt);
+		this.pos = super.solve(this.pos, this.vel, dt);
+	}
+}
+
+class WindMillModel extends RotatorModel {
+	constructor(wind, mass, r, C, rho, tsr) {
+		super();
+		this.wind = wind;
 		this.mass = mass;
 		this.r = r;
 		this.C = C;
 		this.rho = rho;
+		this.tsr = tsr;
 
 		this.J = (mass * r * r) / 3;
 		this.A = r * r * Math.PI;
+
+		// Parametrar för inbromsning
+		this.B = 1000;
+		this.P = 1200;
+		this.refVel = (wind.windSpeed * this.tsr) / this.r;
+
+		let vel = super.getVel();
+		let breakingTorque = this.calculateBreakingTorque(vel);
+
+		this.windForce =
+			0.5 * this.rho * this.C * this.A * Math.pow(wind.windSpeed, 2);
+		this.windTorque = this.windForce * (r / 2);
+
+		// TODO: Ordentlig inbromsning och ingen jäkla funktion för getVel ska behövas >:(
+		this.torque = this.windTorque - breakingTorque;
+
+		this.accExpr = this.torque / this.J;
 	}
 
-	update = windSpeed => dt =>
-		solve(this.J * this.C * this.rho * this.r * this.mass * windSpeed)(dt);
+	calculateBreakingTorque(vel) {
+		let breakingForce = vel * this.B;
+
+		if (vel > this.refVel) {
+			breakingForce += this.P * (vel - this.refVel);
+		}
+
+		return breakingForce;
+	}
+
+	update(dt) {
+		super.solve(this.accExpr, dt);
+	}
 }
 
+class GeneratorModel extends EulerModel {
+	constructor(rotator, L, R, k1, k2) {
+		super();
+		this.rotator = rotator;
+		this.L = L;
+		this.R = R;
+		this.k1 = k1;
+		this.k2 = k2;
+
+		// TODO: Torque är inte i RotatorModel utan i WindMillModel
+		this.i = this.rotator.torque / k1;
+		this.u = this.R * this.i + k2 * this.rotator.vel;
+
+		this.pExpr = this.u * this.i;
+
+		// Initial value
+		this.powerOutput = 0;
+	}
+
+	update(dt) {
+		this.powerOutput = super.solve(this.powerOutput, this.pExpr, dt);
+	}
+}
 
 /////////////////////////////////////////////////////
 //				Update scene 	   		   		   //
@@ -282,10 +341,17 @@ class WindMillModel extends Model {
 
 // Initialize models
 let wind = new Wind(10, 2, 0.01);
-let windMill = new WindMillModel(5000 * 3, 30, 0.04, 1.25);
+let windMill = new WindMillModel(wind, 5000 * 3, 30, 0.04, 1.25);
+let generator = new GeneratorModel(windMill, 0, 0.25, 1, 1);
+
+const needsUpdate = [wind, windMill, generator];
 
 const update = dt => {
 	// Handle simulation logic here, dt = time since last update
+	// Update tick on each model
+	needsUpdate.forEach(model => model.update(dt / 1000));
+	// Do things with values from the models
+	// console.log(windMill.getVel());
 };
 
 /////////////////////////////////////////////////////
@@ -337,10 +403,9 @@ var sunPositionX;
 var sunPositionY;
 
 // Real simple loop, put animations inside
-let last_time = 0;
+let lastTime = Date.now();
 
 var animate = () => {
-	
 	stats.begin(); // Start counting stats
 
 	controls.update();
@@ -360,14 +425,11 @@ var animate = () => {
 	
 
 	// Handle simulation updates
-	let time_now = Date.now();
-	let dt = time_now - last_time;
+	let timeNow = Date.now();
+	let dt = timeNow - lastTime;
 	update(dt);
 
-
-	last_time = time_now;
-
-
+	lastTime = timeNow;
 
 	stats.end(); // Stop counting stats
 };
