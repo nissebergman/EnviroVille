@@ -1,8 +1,6 @@
 /////////////////////////////////////////////////////
 //						Init 					   //
 /////////////////////////////////////////////////////
-//Import dependencies
-
 
 //Init renderer
 var renderer = new THREE.WebGLRenderer({
@@ -37,13 +35,21 @@ var camera = new THREE.PerspectiveCamera(
 var controls = new THREE.OrbitControls(camera, renderer.domElement);
 camera.position.z = 15;
 camera.position.y = 9;
-controls.target = new THREE.Vector3(0,2.2,0);
+controls.target = new THREE.Vector3(0,2.5,0);
 controls.update();
 
 //Init graph for FPS, or wind.
 var stats = new Stats();
 stats.showPanel(0);
 document.body.appendChild(stats.dom);
+
+/////////////////////////////////////////////////////
+//			    Init GUI Params			           //
+/////////////////////////////////////////////////////
+
+var params = {
+		Tid: 8
+}
 
 /////////////////////////////////////////////////////
 //				Init objects	   		  		   //
@@ -126,7 +132,7 @@ scene.add(floor);
 objectLoader.load("/Assets/Models/world.gltf", function(gltf) {
 	world = gltf.scene;
 	world.castShadow = true;
-	world.position.set(0, 0.75, 0);
+	world.position.set(0, 1, 0);
 	scene.add(gltf.scene);
 	gtlf.scene;
 	gltf.cameras;
@@ -161,8 +167,8 @@ objectLoader.load("/Assets/Models/table.gltf", function(gltf) {
 
 objectLoader.load("/Assets/Models/water.gltf", function(gltf) {
 	water = gltf.scene;
-	water.position.set(0, 0.75, 0);
-	scene.add(gltf.scene);
+	water.position.set(0, 1, 0);
+	scene.add(water);
 	gtlf.scene;
 	gltf.cameras;
 	gltf.asset;
@@ -187,9 +193,16 @@ objectLoader.load("/Assets/Models/water.gltf", function(gltf) {
 
 // Sunlight
 sunLight = new THREE.PointLight(0xffee88, 30, 100, 2); //(Color, Intensity, Distance, Decay)
+moonLight = new THREE.PointLight("lightblue", 30, 100, 2); //(Color, Intensity, Distance, Decay)
+moonLight.position.set(0, 5, 0);
+
+
+scene.add(moonLight);
 
 //Append sun "orb" to sunlight
-sunLight.add(new THREE.Mesh(sunGeometry, sunMaterial));
+//sunLight.add(new THREE.Mesh(sunGeometry, sunMaterial));
+
+
 setSun = (x, y, z, intensity) => {
  sunLight.position.set(x, y, z);
  sunLight.intensity = intensity;
@@ -197,7 +210,7 @@ setSun = (x, y, z, intensity) => {
  sunMaterial.needsUpdate = true;
 }
 
-setSun(-0.2, 3.5, 0, 30); //Set default morning sun position
+setSun(-0.2, params.sunHeight, 0, 30); //Set default morning sun position
 sunLight.castShadow = true;
 sunLight.shadow.camera.near = 1;
 sunLight.shadow.camera.far = 60;
@@ -262,34 +275,6 @@ class WindMillModel extends Model {
 		solve(this.J * this.C * this.rho * this.r * this.mass * windSpeed)(dt);
 }
 
-/////////////////////////////////////////////////////
-//				Scene Functionality	   		   	   //
-/////////////////////////////////////////////////////
-
-var timeOfDay = day => {
-
-	time = day.toLowerCase();
-	switch(time) {
-		case "day":
-			console.log("It's day!");
-			setSun(-0.2, 3.5, 0, 30);
-			//setWind(day)
-			break;
-		case "evening":
-			console.log("It's evening!");
-			setSun(1.2, 3.3, 0,10);
-			//setWind(day)
-			break;
-		case "night":
-			console.log("It's nighttime!");
-			setSun(day);
-			//setWind(day)
-			break;
-		default:
-			console.log("Invalid time of day!");
-	}
-}
-
 
 /////////////////////////////////////////////////////
 //				Update scene 	   		   		   //
@@ -307,6 +292,8 @@ const update = dt => {
 //				Init GUI	   		  		       //
 /////////////////////////////////////////////////////
 
+var gui = new dat.GUI();
+gui.add(params, 'Tid',0, 24).step(0.2).name("Tid på dygnet");
 
 /////////////////////////////////////////////////////
 //				Render scene	   		   		   //
@@ -325,10 +312,32 @@ window.addEventListener(
 	false
 );
 
+var sunSettings = tid => {
+	//Dag
+	if (tid >= 8 && tid <= 16) {
+		sunLight.intensity = 30;
+		sunLight.visible = true;
+		moonLight.visible = false;
+
+	}
+	//Kväll
+	if (tid > 16 && tid <= 24) {
+		sunLight.visible = false;
+		moonLight.visible = true;
+
+	}
+	//Natt
+	if (tid >= 0 && tid < 8) {
+		sunLight.visible = false;
+		moonLight.visible = true;
+	}
+}
+
+var sunPositionX;
+var sunPositionY;
+
 // Real simple loop, put animations inside
 let last_time = 0;
-
-var coords = { x: 0, y: 0, z: 0};
 
 var animate = () => {
 	
@@ -336,16 +345,25 @@ var animate = () => {
 
 	controls.update();
 
+
+	sunPositionX = Math.sin(2*Math.PI*(params.Tid/12));
+	sunPositionY = Math.cos(2*Math.PI*(params.Tid/12))+4;
+
+	setSun(sunPositionX, sunPositionY, 0, 30)
+	sunSettings(params.Tid);
 	renderer.shadowMap.enabled = true;
 	sunLight.castShadow = true;
 
 	requestAnimationFrame(animate);
+
 	renderer.render(scene, camera);
+	
 
 	// Handle simulation updates
 	let time_now = Date.now();
 	let dt = time_now - last_time;
 	update(dt);
+
 
 	last_time = time_now;
 
