@@ -181,19 +181,33 @@ objectLoader.load("/Assets/Models/water.gltf", function(gltf) {
 	function(error) {}
 );
 
+objectLoader.load("/Assets/Models/wind.gltf", function(gltf) {
+	turbine = gltf.scene;
+	turbine.castShadow = true;
+	turbine.position.set(0, 1, 0);
+	scene.add(turbine);
+	gtlf.scene;
+	gltf.cameras;
+	gltf.asset;
+},
+
+	function(xhr) {},
+	// called when loading has errors, is HAXXED
+	function(error) {}
+);
+
 /////////////////////////////////////////////////////
 //				Add lights & shadows to scene	   //
 /////////////////////////////////////////////////////
 
-// Ambient light
+/*// Ambient light
 var ambientLight = new THREE.AmbientLight(0x404040, 10);
 scene.add(ambientLight);
-
+*/
 // Sunlight
 sunLight = new THREE.PointLight(0xffee88, 30, 100, 2); //(Color, Intensity, Distance, Decay)
 moonLight = new THREE.PointLight("lightblue", 30, 100, 2); //(Color, Intensity, Distance, Decay)
 moonLight.position.set(0, 5, 0);
-
 
 scene.add(moonLight);
 
