@@ -48,9 +48,14 @@ document.body.appendChild(stats.dom);
 //			    Init GUI Params			           //
 /////////////////////////////////////////////////////
 
-var params = {
-		Tid: 8
+var slider = document.getElementById("myRange");
+var output = document.getElementById("timeDisplay");
+
+var showTime = () => {
+	return (slider.value < 10) ? "Kl: 0" + slider.value : "Kl: " + slider.value;
 }
+
+output.innerHTML = slider.value;
 
 /////////////////////////////////////////////////////
 //				Init objects	   		  		   //
@@ -222,7 +227,7 @@ setSun = (x, y, z, intensity) => {
 	sunMaterial.needsUpdate = true;
 };
 
-setSun(-0.2, params.sunHeight, 0, 30); //Set default morning sun position
+setSun(-0.2, slider.value, 0, 30); //Set default morning sun position
 sunLight.castShadow = true;
 sunLight.shadow.camera.near = 1;
 sunLight.shadow.camera.far = 60;
@@ -368,12 +373,6 @@ const update = dt => {
 	// console.log(windMill.getVel());
 };
 
-/////////////////////////////////////////////////////
-//				Init GUI	   		  		       //
-/////////////////////////////////////////////////////
-
-var gui = new dat.GUI();
-gui.add(params, 'Tid',0, 24).step(0.2).name("Tid på dygnet");
 
 /////////////////////////////////////////////////////
 //				Render scene	   		   		   //
@@ -424,12 +423,14 @@ var animate = () => {
 
 	controls.update();
 
+	output.innerHTML = showTime(); //Update timedisplay
 
-	sunPositionX = Math.sin(2*Math.PI*(params.Tid/12));
-	sunPositionY = Math.cos(2*Math.PI*(params.Tid/12))+4;
+
+	sunPositionX = Math.cos(2*Math.PI*(slider.value/24));
+	sunPositionY = Math.sin(2*Math.PI*(slider.value/24))+4;
 
 	setSun(sunPositionX, sunPositionY, 0, 30)
-	sunSettings(params.Tid);
+	sunSettings(slider.value);
 	renderer.shadowMap.enabled = true;
 	sunLight.castShadow = true;
 

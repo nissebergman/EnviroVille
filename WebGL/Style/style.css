@@ -1,0 +1,52 @@
+.slideContainer {
+
+	width: 100%; /* Width of outside container */
+}
+
+/* The slider */
+.slider {
+	position: absolute;
+	top: 15vw;
+	-webkit-appearance: none;
+	appearance: none;
+	width: 100%;
+	height: 5vw;
+	background: #d3d3d3;
+	outline: none;
+	opacity: 0.7;
+	-webkit-transition: 0.2s;
+	transition: opacity 0.2s;
+}
+
+/* Hover effects */
+.slider:hover {
+	opacity: 1;
+}
+
+/* Slider-button appearance */
+.slider::-webkit-slider-thumb {
+	webkit-appearance: none;
+	appearance: none;
+	width: 5vw;
+	height: 5vw;
+	background: #4CAF50;
+	cursor: pointer;
+}
+
+/* Slider-button appearance for special baby firefox */
+.slider::-mov-range-thumb {
+	width: 5vw;
+	height: 5vw;
+	background: #4CAF50;
+	cursor: pointer;
+}
+
+/* Display time */
+#timeDisplay {
+	position: absolute;
+	z-index: 50;
+	color: white;
+	font-size: 10vw;
+	top: 20vw;
+	left: 40%;
+}
