@@ -6,7 +6,7 @@
 /* The slider */
 .slider {
 	position: absolute;
-	top: 15vw;
+	top: 10%;
 	-webkit-appearance: none;
 	appearance: none;
 	width: 100%;
@@ -47,6 +47,6 @@
 	z-index: 50;
 	color: white;
 	font-size: 10vw;
-	top: 20vw;
-	left: 40%;
+	top: 15%;
+	left: 42%;
 }
