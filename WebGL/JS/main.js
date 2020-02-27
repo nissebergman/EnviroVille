@@ -88,7 +88,7 @@ function loadModels() {
 	const loader = new THREE.GLTFLoader();
 
 	// Plank floor
-	loader.load("assets/floor.gltf", function(gltf) {
+	loader.load("Assets/Models/floor.gltf", function(gltf) {
 		floor = gltf.scene;
 		floor.traverse(function(child) {
 			if (child.isMesh) {
@@ -100,7 +100,7 @@ function loadModels() {
 	});
 
 	// Table
-	loader.load("assets/table.gltf", function(gltf) {
+	loader.load("Assets/Models/table.gltf", function(gltf) {
 		table = gltf.scene;
 		table.traverse(function(child) {
 			if (child.isMesh) {
@@ -113,7 +113,7 @@ function loadModels() {
 	});
 
 	// World
-	loader.load("assets/world.gltf", function(gltf) {
+	loader.load("Assets/Models/world.gltf", function(gltf) {
 		world = gltf.scene;
 
 		// World plane
@@ -128,7 +128,7 @@ function loadModels() {
 	});
 
 	// Houses
-	loader.load("assets/houses.gltf", function(gltf) {
+	loader.load("Assets/Models/houses.gltf", function(gltf) {
 		houses = gltf.scene;
 		houses.traverse(function(child) {
 			if (child.isMesh) {
@@ -140,7 +140,7 @@ function loadModels() {
 	});
 
 	// Windmill
-	loader.load("assets/windmill.gltf", function(gltf) {
+	loader.load("Assets/Models/windmill.gltf", function(gltf) {
 		windmill = gltf.scene;
 		windmill.traverse(function(child) {
 			if (child.isMesh) {
@@ -152,7 +152,7 @@ function loadModels() {
 	});
 
 	// Battery
-	loader.load("assets/battery.gltf", function(gltf) {
+	loader.load("Assets/Models/battery.gltf", function(gltf) {
 		battery = gltf.scene;
 		battery.traverse(function(child) {
 			if (child.isMesh) {
