@@ -26,12 +26,13 @@ var windGraphContext;
 
 // Models
 // var wind = new Wind(10, 2, 0.01);
-// var windMillModel = new WindMillModel(wind, 5000 * 3, 30, 0.04, 8);
-// var generator = new GeneratorModel(windMillModel, 0, 0.25, 1, 1);
-// const models = [wind, windMillModel, generator];
+// var windmillModel = new WindMillModel(wind, 5000 * 3, 30, 0.04, 8);
+// var generator = new GeneratorModel(windmillModel, 0, 0.25, 1, 1);
+// const models = [wind, windmillModel, generator];
 
 var wind = new Wind(10, 5, 0.1);
-var windMillModel = new WindMill(0, euler);
+var windmillModel = new WindMill(0, euler);
+var waterPlantModel = new WaterPlant(euler);
 
 // Colors
 // const skyColors = [
@@ -286,11 +287,15 @@ function animate(time) {
 
 	// Handle windmill simulation
 	wind.update(dt);
-	windMillModel.update(wind.windSpeed, dt);
+	windmillModel.update(wind.windSpeed, dt);
+
+	// Handle water plant simulation
+	waterPlantModel.update(dt);
 
 	if (windmill) {
-		const rps = windMillModel.omega / (2 * Math.PI);
-		console.log(`Windmill energy: ${windMillModel.p}`);
+		const rps = windmillModel.omega / (2 * Math.PI);
+		console.log(`Windmill power: ${windmillModel.p}`);
+		console.log(`Water plant power: ${waterPlantModel.p}`);
 		windmill.children[0].rotateX(dt * 2 * Math.PI * rps);
 	}
 
