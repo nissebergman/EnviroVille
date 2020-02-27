@@ -18,6 +18,15 @@ const moonIntensity = 1.2;
 var sun, moon;
 const sunDistance = 2;
 
+// Models
+// var wind = new Wind(10, 2, 0.01);
+// var windMillModel = new WindMillModel(wind, 5000 * 3, 30, 0.04, 8);
+// var generator = new GeneratorModel(windMillModel, 0, 0.25, 1, 1);
+// const models = [wind, windMillModel, generator];
+
+var wind = new Wind(10, 5, 0.1);
+var windMillModel = new WindMill(0, euler);
+
 // Colors
 // const skyColors = [
 //     {
@@ -81,7 +90,7 @@ function init() {
 	window.addEventListener("resize", resizeRenderer);
 
 	// Start animation loop
-	animate();
+	requestAnimationFrame(animate);
 }
 
 function loadModels() {
@@ -231,7 +240,7 @@ function animate(time) {
 
 	// TODO: Make intensity and opacity depend on timeOfDay
 	sunLight.position.set(lightX, lightY, 0);
-	sunLight.intensity = lerp(0, sunIntensity, timeOfDay);
+	sunLight.intensity = lerp(0, sunIntensity, dayY + 0.6);
 	moonLight.position.set(-lightX, -lightY, 0);
 	moonLight.intensity = lerp(0, moonIntensity, -dayY + 0.6);
 
@@ -248,8 +257,13 @@ function animate(time) {
 		clamp(0.4 + (-dayY + 1) / 2)
 	);
 
+	// Handle windmill simulation
+	wind.update(dt);
+	windMillModel.update(wind.windSpeed, dt);
+
 	if (windmill) {
-		const rps = 0.5;
+		const rps = windMillModel.omega / (2 * Math.PI);
+		console.log(`Windmill energy: ${windMillModel.p}`);
 		windmill.children[0].rotateX(dt * 2 * Math.PI * rps);
 	}
 
@@ -263,6 +277,10 @@ function animate(time) {
 ///////////////////////
 //      Helpers      //
 ///////////////////////
+function euler(previousValue, dt, expression) {
+	return previousValue + expression * dt;
+}
+
 function resizeRenderer() {
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	camera.aspect = window.innerWidth / window.innerHeight;
