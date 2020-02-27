@@ -71,7 +71,7 @@ function init() {
 	// THREE.js setup
 	scene = new THREE.Scene();
 	camera = new THREE.PerspectiveCamera(fov, ratio, near, far);
-	renderer = new THREE.WebGLRenderer();
+	renderer = new THREE.WebGLRenderer({ antialias: true });
 	controls = new THREE.OrbitControls(camera, renderer.domElement);
 
 	// Set up scene
