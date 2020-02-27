@@ -4,7 +4,7 @@ const r = 30;
 const A = Math.pow(r, 2) * Math.PI;
 const J = Math.pow(m * r, 2) / 3;
 const C = 0.04;
-const rho = 1.25;
+const wind_rho = 1.25;
 const tsr = 8;
 
 // Breaking properties
@@ -32,7 +32,7 @@ class WindMill {
 	}
 
 	update(windSpeed, dt) {
-		let windForce = 0.5 * rho * C * A * Math.pow(windSpeed, 2);
+		let windForce = 0.5 * wind_rho * C * A * Math.pow(windSpeed, 2);
 		let windTorque = windForce * (r / 2);
 
 		let breakingTorque = this.calculateBreakingTorque(windSpeed);
