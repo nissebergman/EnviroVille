@@ -9,7 +9,7 @@ var houses, windmill, batery, floor, table, world;
 
 // Lights
 var sunLight, ambientLight;
-const dayLength = 5;
+const dayLength = 50;
 const lightDistance = 10;
 const sunIntensity = 1.5;
 const moonIntensity = 1.2;
@@ -229,10 +229,14 @@ function animate(time) {
 	timeNow = time / 1000;
 	dt = timeNow - lastTime;
 
-	let dayX = Math.cos((timeNow * 2 * Math.PI) / dayLength);
-	let dayY = Math.sin((timeNow * 2 * Math.PI) / dayLength);
-	// Time of day: sun rises at 6:00 and sets at 18:00
-	let timeOfDay = (6 + (dayY + 1) * 12) % 24;
+	// Simulation time in hours driven by t which is between 0 and 1
+	let t = (timeNow % dayLength) / dayLength;
+	let simTime = Math.round((6 + t * 24) % 24);
+
+	let dayX = Math.cos(t * 2 * Math.PI);
+	let dayY = Math.sin(t * 2 * Math.PI);
+
+	console.log(`Time of day: ${simTime}`);
 
 	let sunX = dayX * sunDistance;
 	let sunY = dayY * sunDistance;
@@ -267,8 +271,6 @@ function animate(time) {
 
 	if (windmill) {
 		const rps = windmillModel.omega / (2 * Math.PI);
-		console.log(`Windmill power: ${windmillModel.p}`);
-		console.log(`Water plant power: ${waterPlantModel.p}`);
 		windmill.children[0].rotateX(dt * 2 * Math.PI * rps);
 	}
 
