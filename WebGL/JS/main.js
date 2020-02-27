@@ -1,7 +1,7 @@
 ///////////////////////
 //      Globals      //
 ///////////////////////
-var scene, camera, renderer, controls;
+var scene, camera, renderer, controls, stats;
 var lastTime = 0;
 
 // Models
@@ -17,6 +17,12 @@ const moonIntensity = 1.2;
 // Geometry
 var sun, moon;
 const sunDistance = 2;
+
+//Graphs
+var windGraphX;
+var windGraphY;
+var windGraphCanvas;
+var windGraphContext;
 
 // Models
 // var wind = new Wind(10, 2, 0.01);
@@ -78,6 +84,7 @@ function init() {
 	scene.background = new THREE.Color("skyblue");
 
 	camera.position.set(5, 5, 10);
+	controls.target = new THREE.Vector3(0,2.2,0);
 	controls.enableDamping = true;
 	controls.dampingFactor = 0.05;
 	controls.update();
@@ -85,6 +92,23 @@ function init() {
 	// Append renderer
 	resizeRenderer();
 	document.body.appendChild(renderer.domElement);
+
+	// Set up graphs
+	stats = new Stats();
+	windGraphX = stats.addPanel( new Stats.Panel( 'Wind m/s', '#ff8', '#221' ) );
+	windGraphY = stats.addPanel( new Stats.Panel( 'y', '#ff8', '#221' ) );
+	stats.showPanel( 3 );
+	document.body.appendChild( stats.dom );
+
+	windGraphCanvas = document.createElement("canvas");
+	windGraphCanvas.width = 512;
+	windGraphCanvas.height = 512;
+	document.body.appendChild(windGraphCanvas);
+
+	windGraphContext = windGraphCanvas.getContext("2d");
+	windGraphContext.fillStyle = "rgba(127,0,255,0.05)";
+
+
 
 	// Handle window resize
 	window.addEventListener("resize", resizeRenderer);
@@ -238,6 +262,9 @@ function animate(time) {
 	let lightX = dayX * lightDistance;
 	let lightY = dayY * lightDistance;
 
+	// Start graphs
+	stats.begin();
+
 	// TODO: Make intensity and opacity depend on timeOfDay
 	sunLight.position.set(lightX, lightY, 0);
 	sunLight.intensity = lerp(0, sunIntensity, dayY + 0.6);
@@ -267,7 +294,17 @@ function animate(time) {
 		windmill.children[0].rotateX(dt * 2 * Math.PI * rps);
 	}
 
+	// Draw graphs
+	windGraphContext.beginPath();
+	windGraphContext.fill();
+
 	renderer.render(scene, camera);
+
+	// End graphs
+	stats.end();
+
+	windGraphX.update(wind.windSpeed,20);
+	windGraphY.update(timeNow, 20);
 
 	// Set up next iteration of the render loop
 	lastTime = timeNow;
