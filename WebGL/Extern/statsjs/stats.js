@@ -118,7 +118,7 @@ var Stats = function () {
 Stats.Panel = function ( name, fg, bg ) {
 
 	var min = Infinity, max = 0, round = Math.round;
-	var PR = round( window.devicePixelRatio || 1 );
+	var PR = 4 * round( window.devicePixelRatio || 1 );
 
 	var WIDTH = 80 * PR, HEIGHT = 48 * PR,
 			TEXT_X = 3 * PR, TEXT_Y = 2 * PR,
@@ -132,7 +132,7 @@ Stats.Panel = function ( name, fg, bg ) {
 	canvas.style.cssText = 'width:160px;height:100px;';
 
 	var context = canvas.getContext( '2d' );
-	context.font = 'bold ' + ( 9 * PR ) + 'px Helvetica,Arial,sans-serif';
+	context.font = 'bold ' + ( 6 * PR ) + 'px Helvetica,Arial,sans-serif';
 	context.textBaseline = 'top';
 
 	context.fillStyle = bg;

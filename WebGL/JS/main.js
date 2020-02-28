@@ -1,7 +1,7 @@
 ///////////////////////
 //      Globals      //
 ///////////////////////
-var scene, camera, renderer, controls, stats;
+var scene, camera, renderer, controls;
 var lastTime = 0;
 
 // Models
@@ -18,11 +18,7 @@ const moonIntensity = 1.2;
 var sun, moon;
 const sunDistance = 2;
 
-//Graphs
-var windGraphX;
-var windGraphY;
-var windGraphCanvas;
-var windGraphContext;
+
 
 // Models
 // var wind = new Wind(10, 2, 0.01);
@@ -94,22 +90,7 @@ function init() {
 	resizeRenderer();
 	document.body.appendChild(renderer.domElement);
 
-	// Set up graphs
-	stats = new Stats();
-	windGraphX = stats.addPanel( new Stats.Panel( 'Wind m/s', '#ff8', '#221' ) );
-	windGraphY = stats.addPanel( new Stats.Panel( 'y', '#ff8', '#221' ) );
-	stats.showPanel( 3 );
-	document.body.appendChild( stats.dom );
-
-	windGraphCanvas = document.createElement("canvas");
-	windGraphCanvas.width = 512;
-	windGraphCanvas.height = 512;
-	document.body.appendChild(windGraphCanvas);
-
-	windGraphContext = windGraphCanvas.getContext("2d");
-	windGraphContext.fillStyle = "rgba(127,0,255,0.05)";
-
-
+	initGraphs();
 
 	// Handle window resize
 	window.addEventListener("resize", resizeRenderer);
@@ -142,7 +123,6 @@ function loadModels() {
 				child.receiveShadow = true;
 			}
 		});
-		console.log(table);
 		scene.add(table);
 	});
 
@@ -264,7 +244,8 @@ function animate(time) {
 	let lightY = dayY * lightDistance;
 
 	// Start graphs
-	stats.begin();
+	strengthStats.begin();
+	electricityStats.begin();
 
 	// TODO: Make intensity and opacity depend on timeOfDay
 	sunLight.position.set(lightX, lightY, 0);
@@ -294,8 +275,8 @@ function animate(time) {
 
 	if (windmill) {
 		const rps = windmillModel.omega / (2 * Math.PI);
-		console.log(`Windmill power: ${windmillModel.p}`);
-		console.log(`Water plant power: ${waterPlantModel.p}`);
+		//console.log(`Windmill power: ${windmillModel.p}`);
+		//console.log(`Water plant power: ${waterPlantModel.p}`);
 		windmill.children[0].rotateX(dt * 2 * Math.PI * rps);
 	}
 
@@ -306,10 +287,11 @@ function animate(time) {
 	renderer.render(scene, camera);
 
 	// End graphs
-	stats.end();
+	strengthStats.end();
+	electricityStats.end();
 
-	windGraphX.update(wind.windSpeed,20);
-	windGraphY.update(timeNow, 20);
+	windStrengthGraph.update(wind.windSpeed,20);
+	windElectricityGraph.update(windmillModel.p, Math.pow(10, 8));
 
 	// Set up next iteration of the render loop
 	lastTime = timeNow;

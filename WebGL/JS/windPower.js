@@ -38,10 +38,10 @@ class WindMill {
 		let breakingTorque = this.calculateBreakingTorque(windSpeed);
 		let torque = Math.max(0, windTorque - breakingTorque);
 
-		console.log(
+		/*console.log(
 			`Wind torque: ${windTorque} Breaking torque: ${breakingTorque}`
 		);
-
+		*/
 		// Do windmill updates
 		this.alpha = torque / J;
 		this.omega = this.solver(this.omega, dt, this.alpha);
