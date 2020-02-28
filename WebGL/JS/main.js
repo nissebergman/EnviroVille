@@ -9,7 +9,7 @@ var houses, windmill, batery, floor, table, world;
 
 // Lights
 var sunLight, ambientLight;
-const dayLength = 5;
+const dayLength = 60;
 const lightDistance = 10;
 const sunIntensity = 1.5;
 const moonIntensity = 1.2;
@@ -29,6 +29,7 @@ const sunDistance = 2;
 var wind = new Wind(10, 5, 0.1);
 var windmillModel = new WindMill(0, euler);
 var waterPlantModel = new WaterPlant(euler);
+var solarPanelModel = new SolarPanel(euler);
 
 // Colors
 // const skyColors = [
@@ -59,7 +60,7 @@ var waterPlantModel = new WaterPlant(euler);
 /////////////////////
 function init() {
 	// Camera parameters
-	const fov = 75;
+	const fov = 45;
 	const ratio = window.innerWidth / window.innerHeight;
 	const near = 0.1;
 	const far = 1000;
@@ -81,7 +82,7 @@ function init() {
 	scene.background = new THREE.Color("skyblue");
 
 	camera.position.set(5, 5, 10);
-	controls.target = new THREE.Vector3(0,2.2,0);
+	controls.target = new THREE.Vector3(0, 2.2, 0);
 	controls.enableDamping = true;
 	controls.dampingFactor = 0.05;
 	controls.update();
@@ -233,10 +234,14 @@ function animate(time) {
 	timeNow = time / 1000;
 	dt = timeNow - lastTime;
 
-	let dayX = Math.cos((timeNow * 2 * Math.PI) / dayLength);
-	let dayY = Math.sin((timeNow * 2 * Math.PI) / dayLength);
-	// Time of day: sun rises at 6:00 and sets at 18:00
-	let timeOfDay = (6 + (dayY + 1) * 12) % 24;
+	// Simulation time in hours driven by t which is between 0 and 1
+	let t = (timeNow % dayLength) / dayLength;
+	let simTime = Math.round((6 + t * 24) % 24);
+
+	let dayX = Math.cos(t * 2 * Math.PI);
+	let dayY = Math.sin(t * 2 * Math.PI);
+
+	console.log(`Time of day: ${simTime}`);
 
 	let sunX = dayX * sunDistance;
 	let sunY = dayY * sunDistance;
@@ -273,10 +278,12 @@ function animate(time) {
 	// Handle water plant simulation
 	waterPlantModel.update(dt);
 
+	// Handle solar panel simulation
+	solarPanelModel.update(dt, simTime);
+	console.log(`Solar power: ${solarPanelModel.p}`);
+
 	if (windmill) {
 		const rps = windmillModel.omega / (2 * Math.PI);
-		//console.log(`Windmill power: ${windmillModel.p}`);
-		//console.log(`Water plant power: ${waterPlantModel.p}`);
 		windmill.children[0].rotateX(dt * 2 * Math.PI * rps);
 	}
 
