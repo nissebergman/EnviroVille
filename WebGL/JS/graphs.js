@@ -2,41 +2,71 @@ var stats;
 
 //Graphs
 var windStrengthGraph;
-var windStrengthGraphCanvas;
-var windStrengthGraphContext;
-
 var windElectricityGraph;
-var windElectricityGraphCanvas;
-var windElectricityGraphContext;
 
-function initGraphs() {
+var sunIntensityGraph;
+var sunElectricityGraph;
 
-// Set up graphs
-strengthStats = new Stats();
-electricityStats = new Stats();
+var waterElectricityGraph;
 
-windStrengthGraph = strengthStats.addPanel( new Stats.Panel( 'Wind m/s', '#ff8', '#221' ) );
-windElectricityGraph= electricityStats.addPanel( new Stats.Panel( 'Electricity W', '#ff8', '#221' ) );
-strengthStats.showPanel( 3 );
-electricityStats.showPanel(3);
-electricityStats.domElement.style.cssText ="position:absolute;top:0px;left:160px; width: 300px !important";
+var graphCanvas;
+var graphContext;
 
-document.body.appendChild( strengthStats.dom );
-document.body.appendChild( electricityStats.dom );
+function initWindGraphs() {
+	// Wind
+	stats = new Stats();
+	windStrengthGraph = stats.addPanel( new Stats.Panel( 'Wind m/s', '#ff8', '#221' ) );
+	windElectricityGraph= stats.addPanel( new Stats.Panel( 'Electricity W', '#ff8', '#221' ) );
+	createGraphCanvas();
+	//windElectricityStats.domElement.style.cssText ="position:absolute;top:0px;left:160px; width: 300px !important";
+	graphCounter = 1;
+}
 
-windStrengthGraphCanvas = document.createElement("canvas");
-windStrengthGraphCanvas.width = 512;
-windStrengthGraphCanvas.height = 512;
-document.body.appendChild(windStrengthGraphCanvas);
+function initSunGraphs() {
 
-windElectricityGraphCanvas = document.createElement("canvas");
-windElectricityGraphCanvas.width = 512;
-windElectricityGraphCanvas.height = 512;
-document.body.appendChild(windElectricityGraphCanvas);
+	// Sun
+	stats = new Stats();
+	sunIntensityGraph = stats.addPanel( new Stats.Panel( 'Sun Intensity', '#ff8', '#221' ) );
+	sunElectricityGraph= stats.addPanel( new Stats.Panel( 'Electricity W', '#ff8', '#221' ) );
+	createGraphCanvas();
+	graphCounter = 2;
+	//electricityStats.domElement.style.cssText ="position:absolute;top:0px;left:160px; width: 300px !important";
+}
 
-windGraphContext = windStrengthGraphCanvas.getContext("2d");
-windGraphContext.fillStyle = "rgba(127,0,255,0.05)";
+function initWaterGraphs() {
+	// Water
+	stats = new Stats();
+	createGraphCanvas();
+	waterElectricityGraph = stats.addPanel( new Stats.Panel( 'Waterplant W', '#ff8', '#221' ) );
+	graphCounter = 3;
+	//electricityStats.domElement.style.cssText ="position:absolute;top:0px;left:160px; width: 300px !important";
+}
 
-windElectricityGraphContext = windElectricityGraphCanvas.getContext("2d");
-windElectricityGraphContext.fillStyle = "rgba(127,0,255,0.05)";
+function createGraphCanvas() {
+	stats.showPanel( 3 );
+	document.body.appendChild( stats.dom );
+	graphCanvas = document.createElement("canvas");
+	graphCanvas.width = 512;
+	graphCanvas.height = 512;
+	document.body.appendChild(graphCanvas);
+	graphContext = graphCanvas.getContext("2d");
+	graphContext.fillStyle = "rgba(127,0,255,0.05)";
+}
+
+function updateGraphs(graphCounter) {
+
+	switch(graphCounter) {
+		case 1:
+			windStrengthGraph.update(wind.windSpeed,20);
+			windElectricityGraph.update(windmillModel.p, Math.pow(10, 8));
+		break;
+
+		case 2:
+			sunIntensityGraph.update(solarPanelModel.irradiation,2000);
+			sunElectricityGraph.update(solarPanelModel.p, Math.pow(10, 8));
+		break;
+		case 3:
+			waterElectricityGraph.update(waterPlantModel.p,Math.pow(10, 7))
+		break;
+	}
 }

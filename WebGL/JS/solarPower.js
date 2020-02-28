@@ -11,6 +11,7 @@ const sunSet = 18;
 
 class SolarPanel {
 	constructor(solver) {
+		this.irradiation = 0;
 		this.p = 0;
 		this.energy = 0;
 
@@ -19,8 +20,10 @@ class SolarPanel {
 
 	update(dt, simTime) {
 		// TODO: Cloudiness
+		this.irradiation = this.calculateIrradiation(simTime);
 		this.p = this.calculateIrradiation(simTime) * efficiency * numPanels;
 		this.energy = this.solver(this.energy, dt, this.p);
+
 	}
 
 	calculateIrradiation(simTime) {

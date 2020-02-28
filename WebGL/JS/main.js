@@ -3,6 +3,8 @@
 ///////////////////////
 var scene, camera, renderer, controls;
 var lastTime = 0;
+var pageHasGraph = 0;
+var graphCounter = 1;
 
 // Models
 var houses, windmill, batery, floor, table, world;
@@ -91,7 +93,7 @@ function init() {
 	resizeRenderer();
 	document.body.appendChild(renderer.domElement);
 
-	initGraphs();
+	initWindGraphs();
 
 	// Handle window resize
 	window.addEventListener("resize", resizeRenderer);
@@ -241,7 +243,7 @@ function animate(time) {
 	let dayX = Math.cos(t * 2 * Math.PI);
 	let dayY = Math.sin(t * 2 * Math.PI);
 
-	console.log(`Time of day: ${simTime}`);
+	//console.log(`Time of day: ${simTime}`);
 
 	let sunX = dayX * sunDistance;
 	let sunY = dayY * sunDistance;
@@ -249,8 +251,7 @@ function animate(time) {
 	let lightY = dayY * lightDistance;
 
 	// Start graphs
-	strengthStats.begin();
-	electricityStats.begin();
+	stats.begin();
 
 	// TODO: Make intensity and opacity depend on timeOfDay
 	sunLight.position.set(lightX, lightY, 0);
@@ -280,7 +281,7 @@ function animate(time) {
 
 	// Handle solar panel simulation
 	solarPanelModel.update(dt, simTime);
-	console.log(`Solar power: ${solarPanelModel.p}`);
+	//console.log(`Solar power: ${solarPanelModel.p}`);
 
 	if (windmill) {
 		const rps = windmillModel.omega / (2 * Math.PI);
@@ -288,17 +289,15 @@ function animate(time) {
 	}
 
 	// Draw graphs
-	windGraphContext.beginPath();
-	windGraphContext.fill();
+	graphContext.beginPath();
+	graphContext.fill();
 
 	renderer.render(scene, camera);
 
 	// End graphs
-	strengthStats.end();
-	electricityStats.end();
+	stats.end();
 
-	windStrengthGraph.update(wind.windSpeed,20);
-	windElectricityGraph.update(windmillModel.p, Math.pow(10, 8));
+	updateGraphs(graphCounter);
 
 	// Set up next iteration of the render loop
 	lastTime = timeNow;

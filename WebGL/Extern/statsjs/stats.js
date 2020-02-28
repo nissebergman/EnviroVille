@@ -9,15 +9,28 @@
  */
 
 var Stats = function () {
-
+	
 	var mode = 0;
 
+	if (pageHasGraph == 1) {
+		let element = document.getElementById("Graph");
+		element.parentNode.removeChild(element);
+	}
+	
+	console.log(pageHasGraph);
+	pageHasGraph = 1; 
+
 	var container = document.createElement( 'div' );
+	container.setAttribute("id", "Graph");
+
 	container.style.cssText = 'position:fixed;top:0;left:0;cursor:pointer;opacity:0.9;z-index:10000';
 	container.addEventListener( 'click', function ( event ) {
 
-		event.preventDefault();
-		showPanel( ++ mode % container.children.length );
+	if (graphCounter == 0) initWindGraphs();
+	else if (graphCounter == 1) initSunGraphs();
+	else if (graphCounter == 2) initWaterGraphs();
+	else if (graphCounter == 3) initWindGraphs()
+	
 
 	}, false );
 
@@ -27,22 +40,20 @@ var Stats = function () {
 
 		container.appendChild( panel.dom );
 		return panel;
-
 	}
+
+
 
 	function showPanel( id ) {
 
 		for ( var i = 0; i < container.children.length; i ++ ) {
 
-			container.children[ i ].style.display = i === id ? 'block' : 'none';
+			container.children[ i ].style.display = (i === (id) || (i === (id+1))) ? 'block' : 'none';
 
 		}
 
 		mode = id;
-
 	}
-
-	//
 
 	var beginTime = ( performance || Date ).now(), prevTime = beginTime, frames = 0;
 
