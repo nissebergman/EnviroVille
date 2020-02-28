@@ -9,7 +9,7 @@ var houses, windmill, batery, floor, table, world;
 
 // Lights
 var sunLight, ambientLight;
-const dayLength = 5;
+const dayLength = 60;
 const lightDistance = 10;
 const sunIntensity = 1.5;
 const moonIntensity = 1.2;
@@ -17,6 +17,19 @@ const moonIntensity = 1.2;
 // Geometry
 var sun, moon;
 const sunDistance = 2;
+
+
+
+// Models
+// var wind = new Wind(10, 2, 0.01);
+// var windmillModel = new WindMillModel(wind, 5000 * 3, 30, 0.04, 8);
+// var generator = new GeneratorModel(windmillModel, 0, 0.25, 1, 1);
+// const models = [wind, windmillModel, generator];
+
+var wind = new Wind(10, 5, 0.1);
+var windmillModel = new WindMill(0, euler);
+var waterPlantModel = new WaterPlant(euler);
+var solarPanelModel = new SolarPanel(euler);
 
 // Colors
 // const skyColors = [
@@ -47,7 +60,7 @@ const sunDistance = 2;
 /////////////////////
 function init() {
 	// Camera parameters
-	const fov = 75;
+	const fov = 45;
 	const ratio = window.innerWidth / window.innerHeight;
 	const near = 0.1;
 	const far = 1000;
@@ -55,7 +68,7 @@ function init() {
 	// THREE.js setup
 	scene = new THREE.Scene();
 	camera = new THREE.PerspectiveCamera(fov, ratio, near, far);
-	renderer = new THREE.WebGLRenderer();
+	renderer = new THREE.WebGLRenderer({ antialias: true });
 	controls = new THREE.OrbitControls(camera, renderer.domElement);
 
 	// Set up scene
@@ -69,6 +82,7 @@ function init() {
 	scene.background = new THREE.Color("skyblue");
 
 	camera.position.set(5, 5, 10);
+	controls.target = new THREE.Vector3(0, 2.2, 0);
 	controls.enableDamping = true;
 	controls.dampingFactor = 0.05;
 	controls.update();
@@ -77,11 +91,13 @@ function init() {
 	resizeRenderer();
 	document.body.appendChild(renderer.domElement);
 
+	initGraphs();
+
 	// Handle window resize
 	window.addEventListener("resize", resizeRenderer);
 
 	// Start animation loop
-	animate();
+	requestAnimationFrame(animate);
 }
 
 function loadModels() {
@@ -108,7 +124,6 @@ function loadModels() {
 				child.receiveShadow = true;
 			}
 		});
-		console.log(table);
 		scene.add(table);
 	});
 
@@ -219,19 +234,27 @@ function animate(time) {
 	timeNow = time / 1000;
 	dt = timeNow - lastTime;
 
-	let dayX = Math.cos((timeNow * 2 * Math.PI) / dayLength);
-	let dayY = Math.sin((timeNow * 2 * Math.PI) / dayLength);
-	// Time of day: sun rises at 6:00 and sets at 18:00
-	let timeOfDay = (6 + (dayY + 1) * 12) % 24;
+	// Simulation time in hours driven by t which is between 0 and 1
+	let t = (timeNow % dayLength) / dayLength;
+	let simTime = Math.round((6 + t * 24) % 24);
+
+	let dayX = Math.cos(t * 2 * Math.PI);
+	let dayY = Math.sin(t * 2 * Math.PI);
+
+	console.log(`Time of day: ${simTime}`);
 
 	let sunX = dayX * sunDistance;
 	let sunY = dayY * sunDistance;
 	let lightX = dayX * lightDistance;
 	let lightY = dayY * lightDistance;
 
+	// Start graphs
+	strengthStats.begin();
+	electricityStats.begin();
+
 	// TODO: Make intensity and opacity depend on timeOfDay
 	sunLight.position.set(lightX, lightY, 0);
-	sunLight.intensity = lerp(0, sunIntensity, timeOfDay);
+	sunLight.intensity = lerp(0, sunIntensity, dayY + 0.6);
 	moonLight.position.set(-lightX, -lightY, 0);
 	moonLight.intensity = lerp(0, moonIntensity, -dayY + 0.6);
 
@@ -248,12 +271,34 @@ function animate(time) {
 		clamp(0.4 + (-dayY + 1) / 2)
 	);
 
+	// Handle windmill simulation
+	wind.update(dt);
+	windmillModel.update(wind.windSpeed, dt);
+
+	// Handle water plant simulation
+	waterPlantModel.update(dt);
+
+	// Handle solar panel simulation
+	solarPanelModel.update(dt, simTime);
+	console.log(`Solar power: ${solarPanelModel.p}`);
+
 	if (windmill) {
-		const rps = 0.5;
+		const rps = windmillModel.omega / (2 * Math.PI);
 		windmill.children[0].rotateX(dt * 2 * Math.PI * rps);
 	}
 
+	// Draw graphs
+	windGraphContext.beginPath();
+	windGraphContext.fill();
+
 	renderer.render(scene, camera);
+
+	// End graphs
+	strengthStats.end();
+	electricityStats.end();
+
+	windStrengthGraph.update(wind.windSpeed,20);
+	windElectricityGraph.update(windmillModel.p, Math.pow(10, 8));
 
 	// Set up next iteration of the render loop
 	lastTime = timeNow;
@@ -263,6 +308,10 @@ function animate(time) {
 ///////////////////////
 //      Helpers      //
 ///////////////////////
+function euler(previousValue, dt, expression) {
+	return previousValue + expression * dt;
+}
+
 function resizeRenderer() {
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	camera.aspect = window.innerWidth / window.innerHeight;
