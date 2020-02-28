@@ -84,10 +84,11 @@ function init() {
 
 	renderer.shadowMap.enabled = true;
 	renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+	renderer.outputEncoding = THREE.sRGBEncoding;
 
 	scene.background = new THREE.Color("skyblue");
 
-	camera.position.set(5, 5, 10);
+	camera.position.set(2, 7, 2);
 	controls.target = new THREE.Vector3(0, 2.2, 0);
 	controls.enableDamping = true;
 	controls.dampingFactor = 0.05;
@@ -135,6 +136,7 @@ function loadModels() {
 
 	// World
 	loader.load("Assets/Models/world.gltf", function(gltf) {
+
 		world = gltf.scene;
 
 		// World plane
