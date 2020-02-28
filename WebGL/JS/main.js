@@ -9,7 +9,7 @@ var houses, windmill, batery, floor, table, world;
 
 // Lights
 var sunLight, ambientLight;
-const dayLength = 50;
+const dayLength = 60;
 const lightDistance = 10;
 const sunIntensity = 1.5;
 const moonIntensity = 1.2;
@@ -33,6 +33,7 @@ var windGraphContext;
 var wind = new Wind(10, 5, 0.1);
 var windmillModel = new WindMill(0, euler);
 var waterPlantModel = new WaterPlant(euler);
+var solarPanelModel = new SolarPanel(euler);
 
 // Colors
 // const skyColors = [
@@ -63,7 +64,7 @@ var waterPlantModel = new WaterPlant(euler);
 /////////////////////
 function init() {
 	// Camera parameters
-	const fov = 75;
+	const fov = 45;
 	const ratio = window.innerWidth / window.innerHeight;
 	const near = 0.1;
 	const far = 1000;
@@ -85,7 +86,7 @@ function init() {
 	scene.background = new THREE.Color("skyblue");
 
 	camera.position.set(5, 5, 10);
-	controls.target = new THREE.Vector3(0,2.2,0);
+	controls.target = new THREE.Vector3(0, 2.2, 0);
 	controls.enableDamping = true;
 	controls.dampingFactor = 0.05;
 	controls.update();
@@ -96,10 +97,10 @@ function init() {
 
 	// Set up graphs
 	stats = new Stats();
-	windGraphX = stats.addPanel( new Stats.Panel( 'Wind m/s', '#ff8', '#221' ) );
-	windGraphY = stats.addPanel( new Stats.Panel( 'y', '#ff8', '#221' ) );
-	stats.showPanel( 3 );
-	document.body.appendChild( stats.dom );
+	windGraphX = stats.addPanel(new Stats.Panel("Wind m/s", "#ff8", "#221"));
+	windGraphY = stats.addPanel(new Stats.Panel("y", "#ff8", "#221"));
+	stats.showPanel(3);
+	document.body.appendChild(stats.dom);
 
 	windGraphCanvas = document.createElement("canvas");
 	windGraphCanvas.width = 512;
@@ -108,8 +109,6 @@ function init() {
 
 	windGraphContext = windGraphCanvas.getContext("2d");
 	windGraphContext.fillStyle = "rgba(127,0,255,0.05)";
-
-
 
 	// Handle window resize
 	window.addEventListener("resize", resizeRenderer);
@@ -296,6 +295,10 @@ function animate(time) {
 	// Handle water plant simulation
 	waterPlantModel.update(dt);
 
+	// Handle solar panel simulation
+	solarPanelModel.update(dt, simTime);
+	console.log(`Solar power: ${solarPanelModel.p}`);
+
 	if (windmill) {
 		const rps = windmillModel.omega / (2 * Math.PI);
 		windmill.children[0].rotateX(dt * 2 * Math.PI * rps);
@@ -310,7 +313,7 @@ function animate(time) {
 	// End graphs
 	stats.end();
 
-	windGraphX.update(wind.windSpeed,20);
+	windGraphX.update(wind.windSpeed, 20);
 	windGraphY.update(timeNow, 20);
 
 	// Set up next iteration of the render loop
