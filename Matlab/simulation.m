@@ -1,4 +1,4 @@
-% Simulation parameters
+ % Simulation parameters
 t_end = hr2sec(24);  % End time of simulation
 h = 1;              % Time step
 t = 0:h:t_end;      % Time vector

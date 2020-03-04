@@ -1,468 +1,419 @@
-/////////////////////////////////////////////////////
-//						Init 					   //
-/////////////////////////////////////////////////////
-
-//Init renderer
-var renderer = new THREE.WebGLRenderer({
-	antialias: true
-});
-
-renderer.setClearColor(new THREE.Color("black"), 1);
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.physicallyCorrectLights = true;
-renderer.shadowMap.enabled = true;
-
-//Stick renderer to document body
-document.body.appendChild(renderer.domElement);
-
-//Array of functions for the rendering loop, used for more "krånglig" renderingsloop
-//var onRenderFcts = [];
-
-//Init object loader (For importing .gltf blender files)
-var objectLoader = new THREE.GLTFLoader();
-
-//Init texture loader
-var textureLoader = new THREE.TextureLoader();
-
-//Init scene and movable camera with OrbitControls
-var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera(
-	45,
-	window.innerWidth / window.innerHeight,
-	0.1,
-	20000
-); //FOV, Aspect Ratio, Near-clipping, Far-clipping
-var controls = new THREE.OrbitControls(camera, renderer.domElement);
-camera.position.z = 15;
-camera.position.y = 9;
-controls.target = new THREE.Vector3(0,2.5,0);
-
-controls.update();
-
-//Init graph for FPS, or wind.
-var stats = new Stats();
-stats.showPanel(0);
-document.body.appendChild(stats.dom);
-
-/////////////////////////////////////////////////////
-//			    Init GUI Params			           //
-/////////////////////////////////////////////////////
-
-var params = {
-		Tid: 8
-}
-
-/////////////////////////////////////////////////////
-//				Init objects	   		  		   //
-/////////////////////////////////////////////////////
-var sunGeometry, sunMaterial, sunLight, floorGeometry, floorMaterial;
-
-var floor, world, table;
-
-const roomSize = 30;
-const textureFolder = "/Assets/Textures/";
-
-/////////////////////////////////////////////////////
-//				Object Properties	   		   	   //
-/////////////////////////////////////////////////////
-
-//Physical sun orb
-sunGeometry = new THREE.SphereGeometry(0.1, 16, 8);
-sunMaterial = new THREE.MeshStandardMaterial({
-	emissive: 0xffffee,
-	emissiveIntensity: 1,
-	color: 0x000000
-});
-
-//Floor
-floorGeometry = new THREE.PlaneBufferGeometry(roomSize, roomSize, 2, 2);
-floorMaterial = new THREE.MeshStandardMaterial({
-	roughness: 0.8,
-	metalness: 0.2,
-	bumpScale: 0.001,
-	color: 0xffffff,
-	specular: 0xffffe5
-});
-
-/////////////////////////////////////////////////////
-//				Load textures	   		 		   //
-/////////////////////////////////////////////////////
-
-textureLoader.load(textureFolder + "floor_diffuse.jpg", function(map) {
-	map.wrapS = THREE.RepeatWrapping;
-	map.wrapT = THREE.RepeatWrapping;
-	map.anisotropy = 8;
-	map.repeat.set(4, 4);
-	floorMaterial.map = map;
-	floorMaterial.needsUpdate = true;
-});
-
-textureLoader.load(textureFolder + "floor_bump.jpg", function(map) {
-	map.wrapS = THREE.RepeatWrapping;
-	map.wrapT = THREE.RepeatWrapping;
-	map.anisotropy = 8;
-	map.repeat.set(4, 4);
-	floorMaterial.bumpMap = map;
-	floorMaterial.needsUpdate = true;
-});
-
-textureLoader.load(textureFolder + "floor_roughness.jpg", function(map) {
-	map.wrapS = THREE.RepeatWrapping;
-	map.wrapT = THREE.RepeatWrapping;
-	map.anisotropy = 8;
-	map.repeat.set(4, 4);
-	floorMaterial.roughnessMap = map;
-	floorMaterial.needsUpdate = true;
-});
-
-//Append textures to floor
-floor = new THREE.Mesh(floorGeometry, floorMaterial);
-floor.material.side = THREE.DoubleSide;
-floor.rotation.x = 90 * (Math.PI / 180);
-floor.recieveShadow = true;
-
-/////////////////////////////////////////////////////
-//				Add objects to scene	   		   //
-/////////////////////////////////////////////////////
-
-scene.add(floor);
-
-/////////////////////////////////////////////////////
-//		 Import and add objects to scene	       //
-/////////////////////////////////////////////////////
-
-objectLoader.load("/Assets/Models/world.gltf", function(gltf) {
-	world = gltf.scene;
-	world.castShadow = true;
-	world.position.set(0, 1, 0);
-	scene.add(gltf.scene);
-	gtlf.scene;
-	gltf.cameras;
-	gltf.asset;
-},
-
-	function ( xhr ) {
-
-	},
-
-	function(xhr) {},
-	// called when loading has errors, is HAXXED
-	function(error) {}
-);
-
-objectLoader.load(
-	"/Assets/Models/table.gltf",
-	function(gltf) {
-		table = gltf.scene;
-		table.scale.set(1.5, 1.5, 1.5);
-		table.castShadow = true;
-		scene.add(gltf.scene);
-		gtlf.scene;
-		gltf.cameras;
-		gltf.asset;
-	},
-
-	function(xhr, error) {},
-	// called when loading has errors, is HAXXED
-	function(error) {}
-);
-
-objectLoader.load("/Assets/Models/water.gltf", function(gltf) {
-	water = gltf.scene;
-	water.position.set(0, 1, 0);
-	scene.add(water);
-	gtlf.scene;
-	gltf.cameras;
-	gltf.asset;
-},
-
-	function(xhr) {},
-	// called when loading has errors, is HAXXED
-	function(error) {}
-);
-
-objectLoader.load("/Assets/Models/wind.gltf", function(gltf) {
-	turbine = gltf.scene;
-	turbine.castShadow = true;
-	turbine.position.set(0, 1, 0);
-	scene.add(turbine);
-	gtlf.scene;
-	gltf.cameras;
-	gltf.asset;
-},
-
-	function(xhr) {},
-	// called when loading has errors, is HAXXED
-	function(error) {}
-);
-
-/////////////////////////////////////////////////////
-//				Add lights & shadows to scene	   //
-/////////////////////////////////////////////////////
-
-/*// Ambient light
-var ambientLight = new THREE.AmbientLight(0x404040, 10);
-scene.add(ambientLight);
-*/
-// Sunlight
-sunLight = new THREE.PointLight(0xffee88, 30, 100, 2); //(Color, Intensity, Distance, Decay)
-moonLight = new THREE.PointLight("lightblue", 30, 100, 2); //(Color, Intensity, Distance, Decay)
-moonLight.position.set(0, 5, 0);
-
-scene.add(moonLight);
-
-//Append sun "orb" to sunlight
-//sunLight.add(new THREE.Mesh(sunGeometry, sunMaterial));
-
-
-setSun = (x, y, z, intensity) => {
-	sunLight.position.set(x, y, z);
-	sunLight.intensity = intensity;
-	sunMaterial.emissiveIntensity = intensity;
-	sunMaterial.needsUpdate = true;
-};
-
-setSun(-0.2, params.sunHeight, 0, 30); //Set default morning sun position
-sunLight.castShadow = true;
-sunLight.shadow.camera.near = 1;
-sunLight.shadow.camera.far = 60;
-sunLight.shadow.mapSize.width = 2048;
-sunLight.shadow.mapSize.height = 2048;
-scene.add(sunLight);
-
-/////////////////////////////////////////////////////
-//				Models	   		   		   		   //
-/////////////////////////////////////////////////////
-
-// TODO: Ingen aning om den här funkar på ett vettigt sätt. Vore bra att kunna visualisera denna på nåt sätt!
-class Wind {
-	constructor(baseWind, variation, speed) {
-		this.baseWind = baseWind;
-		this.variation = variation;
-		this.speed = speed;
-
-		this.x = 0;
-		this.y = 0;
-
-		this.windSpeed = baseWind + variation * noise.simplex2(this.x, this.y);
-	}
-
-	// TODO: Borde kanske inte bero på dt ändå
-	update(dt) {
-		this.x += dt * this.speed;
-		this.y += dt * this.speed;
-	}
-}
-
-class EulerModel {
-	// Någon slags Euler-lösare
-	solve(previousValue, expression, dt) {
-		return previousValue + expression * dt;
-	}
-}
-
-class RotatorModel extends EulerModel {
-	constructor() {
-		super();
-		// Initial values
-		this.pos = 0;
-		this.vel = 0;
-	}
-
-	getVel() {
-		return this.vel;
-	}
-
-	solve(accExpr, dt) {
-		this.vel = super.solve(this.vel, accExpr, dt);
-		this.pos = super.solve(this.pos, this.vel, dt);
-	}
-}
-
-class WindMillModel extends RotatorModel {
-	constructor(wind, mass, r, C, rho, tsr) {
-		super();
-		this.wind = wind;
-		this.mass = mass;
-		this.r = r;
-		this.C = C;
-		this.rho = rho;
-		this.tsr = tsr;
-
-		this.J = (mass * r * r) / 3;
-		this.A = r * r * Math.PI;
-
-		// Parametrar för inbromsning
-		this.B = 1000;
-		this.P = 1200;
-		this.refVel = (wind.windSpeed * this.tsr) / this.r;
-
-		let vel = super.getVel();
-		let breakingTorque = this.calculateBreakingTorque(vel);
-
-		this.windForce =
-			0.5 * this.rho * this.C * this.A * Math.pow(wind.windSpeed, 2);
-		this.windTorque = this.windForce * (r / 2);
-
-		// TODO: Ordentlig inbromsning och ingen jäkla funktion för getVel ska behövas >:(
-		this.torque = this.windTorque - breakingTorque;
-
-		this.accExpr = this.torque / this.J;
-	}
-
-	calculateBreakingTorque(vel) {
-		let breakingForce = vel * this.B;
-
-		if (vel > this.refVel) {
-			breakingForce += this.P * (vel - this.refVel);
-		}
-
-		return breakingForce;
-	}
-
-	update(dt) {
-		super.solve(this.accExpr, dt);
-	}
-}
-
-class GeneratorModel extends EulerModel {
-	constructor(rotator, L, R, k1, k2) {
-		super();
-		this.rotator = rotator;
-		this.L = L;
-		this.R = R;
-		this.k1 = k1;
-		this.k2 = k2;
-
-		// TODO: Torque är inte i RotatorModel utan i WindMillModel
-		this.i = this.rotator.torque / k1;
-		this.u = this.R * this.i + k2 * this.rotator.vel;
-
-		this.pExpr = this.u * this.i;
-
-		// Initial value
-		this.powerOutput = 0;
-	}
-
-	update(dt) {
-		this.powerOutput = super.solve(this.powerOutput, this.pExpr, dt);
-	}
-}
-
-/////////////////////////////////////////////////////
-//				Update scene 	   		   		   //
-/////////////////////////////////////////////////////
-
-// Initialize models
-let wind = new Wind(10, 2, 0.01);
-let windMill = new WindMillModel(wind, 5000 * 3, 30, 0.04, 1.25);
-let generator = new GeneratorModel(windMill, 0, 0.25, 1, 1);
-
-const needsUpdate = [wind, windMill, generator];
-
-const update = dt => {
-	// Handle simulation logic here, dt = time since last update
-	// Update tick on each model
-	needsUpdate.forEach(model => model.update(dt / 1000));
-	// Do things with values from the models
-	// console.log(windMill.getVel());
-};
-
-/////////////////////////////////////////////////////
-//				Init GUI	   		  		       //
-/////////////////////////////////////////////////////
-
-var gui = new dat.GUI();
-gui.add(params, 'Tid',0, 24).step(0.2).name("Tid på dygnet");
-
-/////////////////////////////////////////////////////
-//				Render scene	   		   		   //
-/////////////////////////////////////////////////////
-
-renderer.shadowMap.type = THREE.BasicShadowMap;
-
-// Handle user resizing the window
-window.addEventListener(
-	"resize",
-	function() {
-		renderer.setSize(window.innerWidth, window.innerHeight);
-		camera.aspect = window.innerWidth / window.innerHeight;
-		camera.updateProjectionMatrix();
-	},
-	false
-);
-
-var sunSettings = tid => {
-	//Dag
-	if (tid >= 8 && tid <= 16) {
-		sunLight.intensity = 30;
-		sunLight.visible = true;
-		moonLight.visible = false;
-
-	}
-	//Kväll
-	if (tid > 16 && tid <= 24) {
-		sunLight.visible = false;
-		moonLight.visible = true;
-
-	}
-	//Natt
-	if (tid >= 0 && tid < 8) {
-		sunLight.visible = false;
-		moonLight.visible = true;
-	}
-}
-
-var sunPositionX;
-var sunPositionY;
-
-// Real simple loop, put animations inside
-let lastTime = Date.now();
-
-var animate = () => {
-	stats.begin(); // Start counting stats
-
+///////////////////////
+//      Globals      //
+///////////////////////
+var scene, camera, renderer, controls;
+var lastTime = 0;
+var pageHasGraph = 0;
+var graphCounter = 1;
+
+// Models
+var houses, windmill, batery, floor, table, world, hus_Nisse, hus_rik, hus_GamerJon, hus_svensson, hus_Agneta, SolarPanels,
+	wateranimation;
+
+//Moa leker
+var mixer;
+
+// Lights
+var sunLight, ambientLight;
+const dayLength = 60;
+const lightDistance = 10;
+const sunIntensity = 1.5;
+const moonIntensity = 1.2;
+
+// Geometry
+var sun, moon;
+const sunDistance = 2;
+
+
+
+// Models
+// var wind = new Wind(10, 2, 0.01);
+// var windmillModel = new WindMillModel(wind, 5000 * 3, 30, 0.04, 8);
+// var generator = new GeneratorModel(windmillModel, 0, 0.25, 1, 1);
+// const models = [wind, windmillModel, generator];
+
+var wind = new Wind(10, 5, 0.1);
+var windmillModel = new WindMill(0, euler);
+var waterPlantModel = new WaterPlant(euler);
+var solarPanelModel = new SolarPanel(euler);
+
+// Colors
+// const skyColors = [
+//     {
+//         // Dawn color
+//         color: new THREE.Color("gold"),
+//         start:
+//     }
+//     {
+//         // Day color
+//         color: new THREE.Color("lightskyblue"),
+//         start: 0.2
+//     },
+//     {
+//         // Dusk color
+//         color: new THREE.Color("pink"),
+//         start: 0.8
+//     },
+//     {
+//         // Night color
+//         color: new THREE.Color("midnightblue"),
+//         start: 0
+//     }
+// ];
+
+/////////////////////
+//      Setup      //
+/////////////////////
+function init() {
+	// Camera parameters
+	const fov = 45;
+	const ratio = window.innerWidth / window.innerHeight;
+	const near = 0.1;
+	const far = 1000;
+
+	// THREE.js setup
+	scene = new THREE.Scene();
+	camera = new THREE.PerspectiveCamera(fov, ratio, near, far);
+	renderer = new THREE.WebGLRenderer({ antialias: true });
+	controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+	// Set up scene
+	loadModels();
+	setupLights();
+	setupGeometry();
+
+	renderer.shadowMap.enabled = true;
+	renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+	renderer.outputEncoding = THREE.sRGBEncoding;
+
+	scene.background = new THREE.Color("skyblue");
+
+	camera.position.set(2, 7, 2);
+	controls.target = new THREE.Vector3(0, 2.2, 0);
+	controls.enableDamping = true;
+	controls.dampingFactor = 0.05;
 	controls.update();
 
+	// Append renderer
+	resizeRenderer();
+	document.body.appendChild(renderer.domElement);
 
-	sunPositionX = Math.sin(2*Math.PI*(params.Tid/12));
-	sunPositionY = Math.cos(2*Math.PI*(params.Tid/12))+4;
+	initWindGraphs();
 
-	setSun(sunPositionX, sunPositionY, 0, 30)
-	sunSettings(params.Tid);
-	renderer.shadowMap.enabled = true;
-	sunLight.castShadow = true;
+	// Handle window resize
+	window.addEventListener("resize", resizeRenderer);
 
+	// Start animation loop
 	requestAnimationFrame(animate);
+}
+
+function loadModels() {
+	const loader = new THREE.GLTFLoader();
+
+	// Plank floor
+	loader.load("Assets/Models/floor.gltf", function(gltf) {
+		floor = gltf.scene;
+		floor.traverse(function(child) {
+			if (child.isMesh) {
+				child.castShadow = false;
+				child.receiveShadow = true;
+			}
+		});
+		scene.add(floor);
+	});
+
+	// Table
+	loader.load("Assets/Models/table.gltf", function(gltf) {
+		table = gltf.scene;
+		table.traverse(function(child) {
+			if (child.isMesh) {
+				child.castShadow = true;
+				child.receiveShadow = true;
+			}
+		});
+		scene.add(table);
+	});
+
+	// World
+	loader.load("Assets/Models/world.gltf", function(gltf) {
+
+		world = gltf.scene;
+
+		// World plane
+		world.children[0].castShadow = false;
+		world.children[0].receiveShadow = true;
+
+		// World box
+		world.children[1].castShadow = true;
+		world.children[1].receiveShadow = false;
+
+		scene.add(world);
+	});
+
+	// Houses
+	loader.load("Assets/Models/houses.gltf", function(gltf) {
+		houses = gltf.scene;
+		houses.traverse(function(child) {
+			if (child.isMesh) {
+				child.castShadow = false;
+				child.receiveShadow = true;
+			}
+		});
+		scene.add(houses);
+	});
+	// Student Nisse
+	loader.load("Assets/Models/hus_Nisse.gltf", function(gltf) {
+		hus_Nisse = gltf.scene;
+		hus_Nisse.traverse(function(child) {
+			if (child.isMesh) {
+				child.castShadow = false;
+				child.receiveShadow = true;
+			}
+		});
+		scene.add(hus_Nisse);
+	});
+	// Gamer Jönnson
+		loader.load("Assets/Models/hus_GamerJon.gltf", function(gltf) {
+		hus_GamerJon = gltf.scene;
+		hus_GamerJon.traverse(function(child) {
+			if (child.isMesh) {
+				child.castShadow = false;
+				child.receiveShadow = true;
+			}
+		});
+		scene.add(hus_GamerJon);
+	});
+	// Ensamma Agneta
+		loader.load("Assets/Models/hus_rik.gltf", function(gltf) {
+		hus_rik = gltf.scene;
+		hus_rik.traverse(function(child) {
+			if (child.isMesh) {
+				child.castShadow = false;
+				child.receiveShadow = true;
+			}
+		});
+		scene.add(hus_rik);
+	});
+	// Familjen Rik
+		loader.load("Assets/Models/hus_Agneta.gltf", function(gltf) {
+		hus_Agneta = gltf.scene;
+		hus_Agneta.traverse(function(child) {
+			if (child.isMesh) {
+				child.castShadow = false;
+				child.receiveShadow = true;
+			}
+		});
+		scene.add(hus_Agneta);
+	});
+	// Familjen Svensson
+		loader.load("Assets/Models/hus_svensson.gltf", function(gltf) {
+		hus_svensson = gltf.scene;
+		hus_svensson.traverse(function(child) {
+			if (child.isMesh) {
+				child.castShadow = false;
+				child.receiveShadow = true;
+			}
+		});
+		scene.add(hus_svensson);
+	});	
+
+	// Windmill
+	loader.load("Assets/Models/windmills.gltf", function(gltf) {
+		windmill = gltf.scene;
+		windmill.traverse(function(child) {
+			if (child.isMesh) {
+				child.castShadow = false;
+				child.receiveShadow = true;
+			}
+		});
+		scene.add(windmill);
+	});
+	// solarpanels
+	loader.load("Assets/Models/SolarPanels.gltf", function(gltf) {
+		SolarPanels = gltf.scene;
+		SolarPanels.traverse(function(child) {
+			if (child.isMesh) {
+				child.castShadow = false;
+				child.receiveShadow = true;
+			}
+		});
+		scene.add(SolarPanels);
+	});
+	// Wateranimation
+	loader.load("Assets/Models/wateranimation.gltf", function(gltf) {
+		wateranimation = gltf.scene;
+		wateranimation.traverse(function(child) {
+			if (child.isMesh) {
+				child.castShadow = false;
+				child.receiveShadow = true;
+			}
+		
+		});
+		/*mixer = new THREE.AnimationMixer(wateranimation);
+  		var clip1 = gltf.animations[0];
+  		var action1 = mixer.clipAction(clip1);
+  		action1.play();*/
+		scene.add(wateranimation);
+	});	
+
+	// Battery
+	/*loader.load("Assets/Models/battery.gltf", function(gltf) {
+		battery = gltf.scene;
+		battery.traverse(function(child) {
+			if (child.isMesh) {
+				child.castShadow = false;
+				child.receiveShadow = true;
+			}
+		});
+		scene.add(battery);
+	});*/
+}
+
+function setupLights() {
+	ambientLight = new THREE.AmbientLight("skyblue", 0.8);
+
+	sunLight = new THREE.DirectionalLight("lightyellow", sunIntensity);
+	sunLight.castShadow = true;
+	sunLight.shadow.bias = -0.0001;
+
+	moonLight = new THREE.DirectionalLight("royalblue", moonIntensity);
+	moonLight.castShadow = true;
+	moonLight.shadow.bias = -0.0001;
+
+	sunHelper = new THREE.CameraHelper(sunLight.shadow.camera);
+	moonHelper = new THREE.CameraHelper(moonLight.shadow.camera);
+
+	scene.add(ambientLight);
+	scene.add(sunLight);
+	scene.add(moonLight);
+	// scene.add(sunHelper);
+	// scene.add(moonHelper);
+}
+
+function setupGeometry() {
+	sunGeo = new THREE.SphereGeometry(0.1, 16, 16);
+	sunMat = new THREE.MeshStandardMaterial({
+		color: "lightyellow",
+		emissive: "lightyellow",
+		emissiveIntensity: 0.6,
+		transparent: true
+	});
+	sun = new THREE.Mesh(sunGeo, sunMat);
+	sun.position.set(2, 2, 0);
+
+	moonGeo = new THREE.SphereGeometry(0.1, 16, 16);
+	moonMat = new THREE.MeshStandardMaterial({
+		color: "royalblue",
+		emissive: "royalblue",
+		emissiveIntensity: 0.6,
+		transparent: true
+	});
+	moon = new THREE.Mesh(moonGeo, moonMat);
+	moon.position.set(-2, -2, 0);
+	moon.receiveShadow = true;
+
+	scene.add(sun);
+	scene.add(moon);
+}
+
+/////////////////////////
+//      Rendering      //
+/////////////////////////
+function animate(time) {
+	// Time is passed in milliseconds, calculate delta time
+	timeNow = time / 1000;
+	dt = timeNow - lastTime;
+
+	// Simulation time in hours driven by t which is between 0 and 1
+	let t = (timeNow % dayLength) / dayLength;
+	let simTime = Math.round((6 + t * 24) % 24);
+
+	let dayX = Math.cos(t * 2 * Math.PI);
+	let dayY = Math.sin(t * 2 * Math.PI);
+
+	//console.log(`Time of day: ${simTime}`);
+
+	let sunX = dayX * sunDistance;
+	let sunY = dayY * sunDistance;
+	let lightX = dayX * lightDistance;
+	let lightY = dayY * lightDistance;
+
+	// Start graphs
+	stats.begin();
+
+	// TODO: Make intensity and opacity depend on timeOfDay
+	sunLight.position.set(lightX, lightY, 0);
+	sunLight.intensity = lerp(0, sunIntensity, dayY + 0.6);
+	moonLight.position.set(-lightX, -lightY, 0);
+	moonLight.intensity = lerp(0, moonIntensity, -dayY + 0.6);
+
+	sun.visible = dayY > -0.6;
+	sun.position.set(sunX, sunY + 2, 0);
+	moon.visible = dayY < 0.6;
+	moon.position.set(-sunX, -sunY + 2, 0);
+
+	sun.material.opacity = lerp(0, 1, dayY + 0.6);
+	moon.material.opacity = lerp(0, 1, -dayY + 0.6);
+
+	scene.background = new THREE.Color("lightskyblue").lerp(
+		new THREE.Color(0x26265c),
+		clamp(0.4 + (-dayY + 1) / 2)
+	);
+
+	// Handle windmill simulation
+	wind.update(dt);
+	windmillModel.update(wind.windSpeed, dt);
+
+	// Handle water plant simulation
+	waterPlantModel.update(dt);
+
+	// Handle solar panel simulation
+	solarPanelModel.update(dt, simTime);
+	//console.log(`Solar power: ${solarPanelModel.p}`);
+
+	if (windmill) {
+		const rps = windmillModel.omega / (2 * Math.PI);
+		windmill.children[0].rotateX(dt * 2 * Math.PI * rps);
+	}
+	// Moa leker runt här hej hopp
+	/*var deltatid = clock.getDelta()
+	mixer.update(deltatid); */
+
+	// Draw graphs
+	graphContext.beginPath();
+	graphContext.fill();
 
 	renderer.render(scene, camera);
-	
 
-	// Handle simulation updates
-	let timeNow = Date.now();
-	let dt = timeNow - lastTime;
-	update(dt);
+	// End graphs
+	stats.end();
 
+	updateGraphs(graphCounter);
+
+	// Set up next iteration of the render loop
 	lastTime = timeNow;
+	requestAnimationFrame(animate);
+}
 
-	stats.end(); // Stop counting stats
-};
-animate();
+///////////////////////
+//      Helpers      //
+///////////////////////
+function euler(previousValue, dt, expression) {
+	return previousValue + expression * dt;
+}
 
-// More "krånglig" renderingsloop, not sure if better
-// onRenderFcts.push(function(){
-// 	renderer.render (scene, camera );
-// })
+function resizeRenderer() {
+	renderer.setSize(window.innerWidth, window.innerHeight);
+	camera.aspect = window.innerWidth / window.innerHeight;
+	camera.updateProjectionMatrix();
+}
 
-// // Run rendering loop
-// var lastTimeMsec = null;
-// requestAnimationFrame(function animate(nowMsec){
-// 	requestAnimationFrame( animate );
-// 	lastTimeMsec = lastTimeMsec || nowMsec-1000/60
-// 	var deltaMsec = Math.min(200, nowMsec - lastTimeMsec)
-// 	lastTimeMsec = nowMsec
+function clamp(value) {
+	return Math.max(0, Math.min(1, value));
+}
 
-// 	onRenderFcts.forEach(function(onRenderFct){
-// 		onRenderFct(deltaMsec/1000, nowMsec/1000)
-// 	})
-// })
+function lerp(from, to, t) {
+	// Clamp t between 0 and 1
+	t = clamp(t);
+	return (1 - t) * from + to * t;
+}
