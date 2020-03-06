@@ -21,7 +21,8 @@ var windmills,
 	houseSvensson,
 	houseElder,
 	SolarPanels,
-	water;
+	water,
+	gauge;
 
 // Moa leker
 var mixer;
@@ -250,6 +251,18 @@ function loadModels() {
 		scene.add(SolarPanels);
 	});
 
+	// Gauge
+	loader.load("Assets/Models/gauge.gltf", function(gltf) {
+		gauge = gltf.scene;
+		gauge.traverse(function(child) {
+			if (child.isMesh) {
+				child.castShadow = false;
+				child.receiveShadow = true;
+			}
+		});
+		scene.add(gauge);
+	});
+
 	// Water
 	loader.load("Assets/Models/wateranimation.gltf", function(gltf) {
 		water = gltf.scene;
@@ -259,10 +272,6 @@ function loadModels() {
 				child.receiveShadow = true;
 			}
 		});
-		/*mixer = new THREE.AnimationMixer(water);
-  		var clip1 = gltf.animations[0];
-  		var action1 = mixer.clipAction(clip1);
-  		action1.play();*/
 		scene.add(water);
 	});
 }
@@ -346,10 +355,6 @@ function animate(time) {
 			);
 		});
 	}
-
-	// Moa leker runt här hej hopp
-	/*var deltatid = clock.getDelta()
-	mixer.update(deltatid); */
 
 	// Draw graphs
 	graphContext.beginPath();
