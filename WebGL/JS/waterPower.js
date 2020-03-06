@@ -13,7 +13,7 @@ class WaterPlant {
 	}
 
 	update(dt) {
-		this.p = N * water_rho * Q * g * H;
+		this.p = (N * water_rho * Q * g * H)/1000;
 		this.energy = this.solver(this.p, dt, this.energy);
 	}
 }

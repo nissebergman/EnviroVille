@@ -1,4 +1,4 @@
-houseHoldConsumption = [{
+data = [{
 	type: "student",
 	morning: 8,
 	evening: 23,
@@ -19,7 +19,7 @@ class Household  {
 
 	//Connect type of household to correct data
 	connect(type){
-		 return(houseHoldConsumption.find(household => household.type === type));
+		 return(data.find(household => household.type === type));
 	}
 
 	calculateConsumption(simTime) {
