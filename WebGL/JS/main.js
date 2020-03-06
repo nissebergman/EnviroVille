@@ -43,6 +43,13 @@ var windmillModels = [];
 var waterPlantModel = new WaterPlant(euler);
 var solarPanelModel = new SolarPanel(euler);
 
+//
+var studentConsumption = new HouseHold("student", 1);
+var gamerConsumption = new HouseHold("gamer", 1);
+var elderConsumption = new HouseHold("elder",1);
+var richConsumption = new HouseHold("rich",1);
+var svenssonConsumption
+
 var powerProduction = {
 	totalWind: 0,
 	totalWater: 0,
