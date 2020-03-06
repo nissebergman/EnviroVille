@@ -7,19 +7,17 @@ var pageHasGraph = 0;
 var graphCounter = 1;
 
 // Models
-var houses,
-	windmill,
-	batery,
+var windmills,
 	floor,
 	table,
 	world,
-	hus_Nisse,
-	hus_rik,
-	hus_GamerJon,
-	hus_svensson,
-	hus_Agneta,
+	houseStudent,
+	houseRich,
+	houseGamer,
+	houseSvensson,
+	houseElder,
 	SolarPanels,
-	wateranimation;
+	water;
 
 //Moa leker
 var mixer;
@@ -154,74 +152,74 @@ function loadModels() {
 
 	// Student Nisse
 	loader.load("Assets/Models/hus_Nisse.gltf", function(gltf) {
-		hus_Nisse = gltf.scene;
-		hus_Nisse.traverse(function(child) {
+		houseStudent = gltf.scene;
+		houseStudent.traverse(function(child) {
 			if (child.isMesh) {
 				child.castShadow = false;
 				child.receiveShadow = true;
 			}
 		});
-		scene.add(hus_Nisse);
+		scene.add(houseStudent);
 	});
 
 	// Gamer Jönnson
 	loader.load("Assets/Models/hus_GamerJon.gltf", function(gltf) {
-		hus_GamerJon = gltf.scene;
-		hus_GamerJon.traverse(function(child) {
+		houseGamer = gltf.scene;
+		houseGamer.traverse(function(child) {
 			if (child.isMesh) {
 				child.castShadow = false;
 				child.receiveShadow = true;
 			}
 		});
-		scene.add(hus_GamerJon);
-	});
-
-	// Ensamma Agneta
-	loader.load("Assets/Models/hus_rik.gltf", function(gltf) {
-		hus_rik = gltf.scene;
-		hus_rik.traverse(function(child) {
-			if (child.isMesh) {
-				child.castShadow = false;
-				child.receiveShadow = true;
-			}
-		});
-		scene.add(hus_rik);
+		scene.add(houseGamer);
 	});
 
 	// Familjen Rik
-	loader.load("Assets/Models/hus_Agneta.gltf", function(gltf) {
-		hus_Agneta = gltf.scene;
-		hus_Agneta.traverse(function(child) {
+	loader.load("Assets/Models/hus_rik.gltf", function(gltf) {
+		houseRich = gltf.scene;
+		houseRich.traverse(function(child) {
 			if (child.isMesh) {
 				child.castShadow = false;
 				child.receiveShadow = true;
 			}
 		});
-		scene.add(hus_Agneta);
+		scene.add(houseRich);
+	});
+
+	// Ensamma Agneta
+	loader.load("Assets/Models/hus_Agneta.gltf", function(gltf) {
+		houseElder = gltf.scene;
+		houseElder.traverse(function(child) {
+			if (child.isMesh) {
+				child.castShadow = false;
+				child.receiveShadow = true;
+			}
+		});
+		scene.add(houseElder);
 	});
 
 	// Familjen Svensson
 	loader.load("Assets/Models/hus_svensson.gltf", function(gltf) {
-		hus_svensson = gltf.scene;
-		hus_svensson.traverse(function(child) {
+		houseSvensson = gltf.scene;
+		houseSvensson.traverse(function(child) {
 			if (child.isMesh) {
 				child.castShadow = false;
 				child.receiveShadow = true;
 			}
 		});
-		scene.add(hus_svensson);
+		scene.add(houseSvensson);
 	});
 
-	// Windmill
+	// Windmills
 	loader.load("Assets/Models/windmills.gltf", function(gltf) {
-		windmill = gltf.scene;
-		windmill.traverse(function(child) {
+		windmills = gltf.scene;
+		windmills.traverse(function(child) {
 			if (child.isMesh) {
 				child.castShadow = false;
 				child.receiveShadow = true;
 			}
 		});
-		scene.add(windmill);
+		scene.add(windmills);
 	});
 
 	// Solarpanels
@@ -238,18 +236,18 @@ function loadModels() {
 
 	// Water
 	loader.load("Assets/Models/wateranimation.gltf", function(gltf) {
-		wateranimation = gltf.scene;
-		wateranimation.traverse(function(child) {
+		water = gltf.scene;
+		water.traverse(function(child) {
 			if (child.isMesh) {
 				child.castShadow = false;
 				child.receiveShadow = true;
 			}
 		});
-		/*mixer = new THREE.AnimationMixer(wateranimation);
+		/*mixer = new THREE.AnimationMixer(water);
   		var clip1 = gltf.animations[0];
   		var action1 = mixer.clipAction(clip1);
   		action1.play();*/
-		scene.add(wateranimation);
+		scene.add(water);
 	});
 }
 
@@ -342,7 +340,7 @@ function animate(time) {
 		clamp(0.4 + (-dayY + 1) / 2)
 	);
 
-	// Handle windmill simulation
+	// Handle windmills simulation
 	wind.update(dt);
 	windmillModel.update(wind.windSpeed, dt);
 
