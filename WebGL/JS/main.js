@@ -316,6 +316,7 @@ function setupGeometry() {
 	scene.add(moon);
 }
 
+
 /////////////////////////
 //      Rendering      //
 /////////////////////////
