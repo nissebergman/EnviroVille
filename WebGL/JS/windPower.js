@@ -18,9 +18,9 @@ const R = 0.25;
 const L = 0.01;
 
 class WindMill {
-	constructor(startingRotation, solver) {
+	constructor(startingVelocity, startingRotation, solver) {
 		this.alpha = 0;
-		this.omega = Math.PI;
+		this.omega = startingVelocity;
 		this.theta = startingRotation;
 
 		this.i = 0;

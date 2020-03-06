@@ -34,7 +34,7 @@ var sun, moon;
 const sunDistance = 2;
 
 var wind = new Wind(10, 5, 0.1);
-var windmillModel = new WindMill(0, euler);
+var windmillModels = [];
 var waterPlantModel = new WaterPlant(euler);
 var solarPanelModel = new SolarPanel(euler);
 
@@ -82,6 +82,11 @@ function init() {
 	loadModels();
 	setupLights();
 	setupGeometry();
+
+	// Simulation models setup
+	windmillModels.push(new WindMill(Math.PI / 2, 0, euler));
+	windmillModels.push(new WindMill(Math.PI, (2 * Math.PI) / 3, euler));
+	windmillModels.push(new WindMill(Math.PI / 3, (4 * Math.PI) / 3, euler));
 
 	renderer.shadowMap.enabled = true;
 	renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -342,7 +347,7 @@ function animate(time) {
 
 	// Handle windmills simulation
 	wind.update(dt);
-	windmillModel.update(wind.windSpeed, dt);
+	windmillModels.forEach(model => model.update(wind.windSpeed, dt));
 
 	// Handle water plant simulation
 	waterPlantModel.update(dt);
@@ -350,9 +355,18 @@ function animate(time) {
 	// Handle solar panel simulation
 	solarPanelModel.update(dt, simTime);
 
-	if (windmill) {
-		const rps = windmillModel.omega / (2 * Math.PI);
-		windmill.children[0].rotateX(dt * 2 * Math.PI * rps);
+	if (windmills) {
+		windmillModels.forEach((model, idx) => {
+			// const rps = model.omega / (2 * Math.PI);
+			// windmills.children[idx * 2].rotateX(dt * 2 * Math.PI * rps);
+			let windmill = windmills.children[idx * 2];
+			windmill.rotation.set(
+				model.theta,
+				windmill.rotation.y,
+				windmill.rotation.z,
+				"ZYX"
+			);
+		});
 	}
 
 	// Moa leker runt här hej hopp
