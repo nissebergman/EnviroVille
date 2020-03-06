@@ -6,6 +6,10 @@ var lastTime = 0;
 var pageHasGraph = 0;
 var graphCounter = 1;
 
+var dt = 0;
+var t = 0;
+var simTime = 0;
+
 // Models
 var windmills,
 	floor,
@@ -312,49 +316,16 @@ function animate(time) {
 	dt = timeNow - lastTime;
 
 	// Simulation time in hours driven by t which is between 0 and 1
-	let t = (timeNow % dayLength) / dayLength;
-	let simTime = Math.round((6 + t * 24) % 24);
-
-	let dayX = Math.cos(t * 2 * Math.PI);
-	let dayY = Math.sin(t * 2 * Math.PI);
-
-	let sunX = dayX * sunDistance;
-	let sunY = dayY * sunDistance;
-	let lightX = dayX * lightDistance;
-	let lightY = dayY * lightDistance;
+	t = (timeNow % dayLength) / dayLength;
+	simTime = Math.round((6 + t * 24) % 24);
 
 	// Start graphs
 	stats.begin();
 
-	// TODO: Make intensity and opacity depend on simTime
-	sunLight.position.set(lightX, lightY, 0);
-	sunLight.intensity = lerp(0, sunIntensity, dayY + 0.6);
-	moonLight.position.set(-lightX, -lightY, 0);
-	moonLight.intensity = lerp(0, moonIntensity, -dayY + 0.6);
+	handleDayNightCycle();
+	handleSimulationUpdates();
 
-	sun.visible = dayY > -0.6;
-	sun.position.set(sunX, sunY + 2, 0);
-	moon.visible = dayY < 0.6;
-	moon.position.set(-sunX, -sunY + 2, 0);
-
-	sun.material.opacity = lerp(0, 1, dayY + 0.6);
-	moon.material.opacity = lerp(0, 1, -dayY + 0.6);
-
-	scene.background = new THREE.Color("lightskyblue").lerp(
-		new THREE.Color(0x26265c),
-		clamp(0.4 + (-dayY + 1) / 2)
-	);
-
-	// Handle windmills simulation
-	wind.update(dt);
-	windmillModels.forEach(model => model.update(wind.windSpeed, dt));
-
-	// Handle water plant simulation
-	waterPlantModel.update(dt);
-
-	// Handle solar panel simulation
-	solarPanelModel.update(dt, simTime);
-
+	// Handle animation
 	if (windmills) {
 		windmillModels.forEach((model, idx) => {
 			// const rps = model.omega / (2 * Math.PI);
@@ -410,4 +381,45 @@ function lerp(from, to, t) {
 	// Clamp t between 0 and 1
 	t = clamp(t);
 	return (1 - t) * from + to * t;
+}
+
+function handleDayNightCycle() {
+	let dayX = Math.cos(t * 2 * Math.PI);
+	let dayY = Math.sin(t * 2 * Math.PI);
+
+	let sunX = dayX * sunDistance;
+	let sunY = dayY * sunDistance;
+	let lightX = dayX * lightDistance;
+	let lightY = dayY * lightDistance;
+
+	// TODO: Make intensity and opacity depend on simTime
+	sunLight.position.set(lightX, lightY, 0);
+	sunLight.intensity = lerp(0, sunIntensity, dayY + 0.6);
+	moonLight.position.set(-lightX, -lightY, 0);
+	moonLight.intensity = lerp(0, moonIntensity, -dayY + 0.6);
+
+	sun.visible = dayY > -0.6;
+	sun.position.set(sunX, sunY + 2, 0);
+	moon.visible = dayY < 0.6;
+	moon.position.set(-sunX, -sunY + 2, 0);
+
+	sun.material.opacity = lerp(0, 1, dayY + 0.6);
+	moon.material.opacity = lerp(0, 1, -dayY + 0.6);
+
+	scene.background = new THREE.Color("lightskyblue").lerp(
+		new THREE.Color(0x26265c),
+		clamp(0.4 + (-dayY + 1) / 2)
+	);
+}
+
+function handleSimulationUpdates(dt) {
+	// Handle windmills simulation
+	wind.update(dt);
+	windmillModels.forEach(model => model.update(wind.windSpeed, dt));
+
+	// Handle water plant simulation
+	waterPlantModel.update(dt);
+
+	// Handle solar panel simulation
+	solarPanelModel.update(dt, simTime);
 }
