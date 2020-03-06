@@ -21,7 +21,7 @@ class SolarPanel {
 	update(dt, simTime) {
 		// TODO: Cloudiness
 		this.irradiation = this.calculateIrradiation(simTime);
-		this.p = this.calculateIrradiation(simTime) * efficiency * numPanels;
+		this.p = (this.calculateIrradiation(simTime) * efficiency * numPanels)/1000;
 		this.energy = this.solver(this.energy, dt, this.p);
 
 	}
