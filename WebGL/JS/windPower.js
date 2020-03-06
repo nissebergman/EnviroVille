@@ -46,7 +46,7 @@ class WindMill {
 		// Do generator updates
 		this.i = torque / K1;
 		this.u = R * this.i + K2 * this.omega;
-		this.p = this.u * this.i;
+		this.p = (this.u * this.i)/1000;
 		this.energy = this.solver(this.energy, dt, this.p);
 	}
 

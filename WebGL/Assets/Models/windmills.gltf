@@ -6,6 +6,9 @@
     "scene" : 0,
     "scenes" : [
         {
+            "extras" : {
+                "AutoMirror_axis" : 1
+            },
             "name" : "Scene",
             "nodes" : [
                 0,
@@ -17,13 +20,14 @@
             ]
         },
         {
+            "extras" : {},
             "name" : "Scene.001"
         }
     ],
     "nodes" : [
         {
             "mesh" : 0,
-            "name" : "windmill_rotor1",
+            "name" : "windmill_rotor",
             "rotation" : [
                 0,
                 0.95478355884552,
@@ -43,7 +47,7 @@
         },
         {
             "mesh" : 1,
-            "name" : "windmill_body1",
+            "name" : "windmill_body",
             "rotation" : [
                 -0.6751339435577393,
                 0.6751338839530945,
@@ -63,7 +67,7 @@
         },
         {
             "mesh" : 2,
-            "name" : "windmill_rotor.2",
+            "name" : "windmill_rotor.001",
             "rotation" : [
                 0,
                 0.9418473243713379,
@@ -83,7 +87,7 @@
         },
         {
             "mesh" : 3,
-            "name" : "windmill_body.2",
+            "name" : "windmill_body.001",
             "rotation" : [
                 -0.6659866571426392,
                 0.6659865975379944,
@@ -103,7 +107,7 @@
         },
         {
             "mesh" : 4,
-            "name" : "windmill_rotor.3",
+            "name" : "windmill_rotor.002",
             "rotation" : [
                 0,
                 0.9390955567359924,
@@ -123,7 +127,7 @@
         },
         {
             "mesh" : 5,
-            "name" : "windmill_body.3",
+            "name" : "windmill_body.002",
             "rotation" : [
                 -0.6640408635139465,
                 0.6640408039093018,
@@ -142,6 +146,22 @@
             ]
         }
     ],
+    "materials" : [
+        {
+            "doubleSided" : true,
+            "name" : "windmill",
+            "pbrMetallicRoughness" : {
+                "baseColorFactor" : [
+                    0.800000011920929,
+                    0.800000011920929,
+                    0.800000011920929,
+                    1
+                ],
+                "metallicFactor" : 0,
+                "roughnessFactor" : 0.5
+            }
+        }
+    ],
     "meshes" : [
         {
             "name" : "Cube.045",
@@ -152,7 +172,8 @@
                         "NORMAL" : 1,
                         "TEXCOORD_0" : 2
                     },
-                    "indices" : 3
+                    "indices" : 3,
+                    "material" : 0
                 }
             ]
         },
@@ -165,7 +186,8 @@
                         "NORMAL" : 5,
                         "TEXCOORD_0" : 6
                     },
-                    "indices" : 7
+                    "indices" : 7,
+                    "material" : 0
                 }
             ]
         },
@@ -178,7 +200,8 @@
                         "NORMAL" : 9,
                         "TEXCOORD_0" : 10
                     },
-                    "indices" : 3
+                    "indices" : 3,
+                    "material" : 0
                 }
             ]
         },
@@ -191,7 +214,8 @@
                         "NORMAL" : 12,
                         "TEXCOORD_0" : 13
                     },
-                    "indices" : 7
+                    "indices" : 7,
+                    "material" : 0
                 }
             ]
         },
@@ -204,7 +228,8 @@
                         "NORMAL" : 15,
                         "TEXCOORD_0" : 16
                     },
-                    "indices" : 3
+                    "indices" : 3,
+                    "material" : 0
                 }
             ]
         },
@@ -217,7 +242,8 @@
                         "NORMAL" : 18,
                         "TEXCOORD_0" : 19
                     },
-                    "indices" : 7
+                    "indices" : 7,
+                    "material" : 0
                 }
             ]
         }

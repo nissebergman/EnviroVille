@@ -19,7 +19,7 @@ function initWindGraphs() {
 		new Stats.Panel("Wind m/s", "#ff8", "#221")
 	);
 	windElectricityGraph = stats.addPanel(
-		new Stats.Panel("Electricity W", "#ff8", "#221")
+		new Stats.Panel("Electricity kWh", "#ff8", "#221")
 	);
 	createGraphCanvas();
 	//windElectricityStats.domElement.style.cssText ="position:absolute;top:0px;left:160px; width: 300px !important";
@@ -33,7 +33,7 @@ function initSunGraphs() {
 		new Stats.Panel("Sun Intensity", "#ff8", "#221")
 	);
 	sunElectricityGraph = stats.addPanel(
-		new Stats.Panel("Electricity W", "#ff8", "#221")
+		new Stats.Panel("Electricity kWh", "#ff8", "#221")
 	);
 	createGraphCanvas();
 	graphCounter = 2;
@@ -45,7 +45,7 @@ function initWaterGraphs() {
 	stats = new Stats();
 	createGraphCanvas();
 	waterElectricityGraph = stats.addPanel(
-		new Stats.Panel("Waterplant W", "#ff8", "#221")
+		new Stats.Panel("Waterplant kWh", "#ff8", "#221")
 	);
 	graphCounter = 3;
 	//electricityStats.domElement.style.cssText ="position:absolute;top:0px;left:160px; width: 300px !important";
