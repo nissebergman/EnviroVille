@@ -66,16 +66,15 @@ function updateGraphs(graphCounter) {
 	switch (graphCounter) {
 		case 1:
 			windStrengthGraph.update(wind.windSpeed, 20);
-			// TOFIX: Måste kunna få totalproduktion för alla tre vindkraftverk
-			//windElectricityGraph.update(windmillModel.p, Math.pow(10, 8));
+			windElectricityGraph.update(powerProduction.totalWind, Math.pow(10, 9));
 			break;
 
 		case 2:
 			sunIntensityGraph.update(solarPanelModel.irradiation, 2000);
-			sunElectricityGraph.update(solarPanelModel.p, Math.pow(10, 8));
+			sunElectricityGraph.update(powerProduction.totalSolar, Math.pow(10, 8));
 			break;
 		case 3:
-			waterElectricityGraph.update(waterPlantModel.p, Math.pow(10, 7));
+			waterElectricityGraph.update(powerProduction.totalWater, Math.pow(10, 7));
 			break;
 	}
 }

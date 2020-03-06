@@ -10,7 +10,7 @@ var dt = 0;
 var t = 0;
 var simTime = 0;
 
-// Models
+// 3D Models
 var windmills,
 	floor,
 	table,
@@ -23,7 +23,7 @@ var windmills,
 	SolarPanels,
 	water;
 
-//Moa leker
+// Moa leker
 var mixer;
 
 // Lights
@@ -37,10 +37,17 @@ const moonIntensity = 1.2;
 var sun, moon;
 const sunDistance = 2;
 
+// Simulation models
 var wind = new Wind(10, 5, 0.1);
 var windmillModels = [];
 var waterPlantModel = new WaterPlant(euler);
 var solarPanelModel = new SolarPanel(euler);
+
+var powerProduction = {
+	totalWind: 0,
+	totalWater: 0,
+	totalSolar: 0
+};
 
 // Colors
 // const skyColors = [
@@ -312,7 +319,7 @@ function setupGeometry() {
 /////////////////////////
 function animate(time) {
 	// Time is passed in milliseconds, calculate delta time
-	timeNow = time / 1000;
+	let timeNow = time / 1000;
 	dt = timeNow - lastTime;
 
 	// Simulation time in hours driven by t which is between 0 and 1
@@ -412,7 +419,7 @@ function handleDayNightCycle() {
 	);
 }
 
-function handleSimulationUpdates(dt) {
+function handleSimulationUpdates() {
 	// Handle windmills simulation
 	wind.update(dt);
 	windmillModels.forEach(model => model.update(wind.windSpeed, dt));
@@ -422,4 +429,11 @@ function handleSimulationUpdates(dt) {
 
 	// Handle solar panel simulation
 	solarPanelModel.update(dt, simTime);
+
+	powerProduction.totalSolar = solarPanelModel.p;
+	powerProduction.totalWater = waterPlantModel.p;
+	powerProduction.totalWind = windmillModels.reduce(
+		(total, current) => total + current.p,
+		0
+	);
 }
