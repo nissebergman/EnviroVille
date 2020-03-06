@@ -21,7 +21,8 @@ var windmills,
 	houseSvensson,
 	houseElder,
 	SolarPanels,
-	water;
+	water,
+	houseGroup;
 
 // Moa leker
 var mixer;
@@ -44,11 +45,11 @@ var waterPlantModel = new WaterPlant(euler);
 var solarPanelModel = new SolarPanel(euler);
 
 //
-var studentConsumption = new HouseHold("student", 1);
-var gamerConsumption = new HouseHold("gamer", 1);
-var elderConsumption = new HouseHold("elder",1);
-var richConsumption = new HouseHold("rich",1);
-var svenssonConsumption
+var studentConsumption = new Household("student", 1);
+var gamerConsumption = new Household("gamer", 1);
+var elderConsumption = new Household("elder", 1);
+var richConsumption = new Household("rich", 1);
+var svenssonConsumption = new Household("svensson", 1);
 
 var powerProduction = {
 	totalWind: 0,
@@ -134,6 +135,8 @@ function init() {
 function loadModels() {
 	const loader = new THREE.GLTFLoader();
 
+	var houseGroup = [];
+
 	// Plank floor
 	loader.load("Assets/Models/floor.gltf", function(gltf) {
 		floor = gltf.scene;
@@ -188,6 +191,7 @@ function loadModels() {
 	// Gamer Jönnson
 	loader.load("Assets/Models/hus_GamerJon.gltf", function(gltf) {
 		houseGamer = gltf.scene;
+		houseGamer.name = "houseGamer";
 		houseGamer.traverse(function(child) {
 			if (child.isMesh) {
 				child.castShadow = false;
@@ -272,6 +276,8 @@ function loadModels() {
   		action1.play();*/
 		scene.add(water);
 	});
+
+	// Put houses into a group to be able to select them
 }
 
 function setupLights() {
@@ -363,6 +369,8 @@ function animate(time) {
 	graphContext.beginPath();
 	graphContext.fill();
 
+	updateRaycaster();
+
 	renderer.render(scene, camera);
 
 	// End graphs
@@ -374,6 +382,8 @@ function animate(time) {
 	lastTime = timeNow;
 	requestAnimationFrame(animate);
 }
+	//For raycasting
+window.addEventListener( 'mousemove', onMouseMove, false );
 
 ///////////////////////
 //      Helpers      //
@@ -438,6 +448,12 @@ function handleSimulationUpdates() {
 	// Handle solar panel simulation
 	solarPanelModel.update(dt, simTime);
 
+	// Handle consumption simulations
+	studentConsumption.update(dt, simTime);
+	gamerConsumption.update(dt, simTime);
+	elderConsumption.update(dt, simTime);
+	svenssonConsumption.update(dt, simTime);
+
 	powerProduction.totalSolar = solarPanelModel.p;
 	powerProduction.totalWater = waterPlantModel.p;
 	powerProduction.totalWind = windmillModels.reduce(
@@ -445,3 +461,4 @@ function handleSimulationUpdates() {
 		0
 	);
 }
+
