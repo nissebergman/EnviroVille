@@ -95,9 +95,9 @@ function init() {
 	setupGeometry();
 
 	// Simulation models setup
-	windmillModels.push(new WindMill(Math.PI / 2, 0, euler));
-	windmillModels.push(new WindMill(Math.PI, (2 * Math.PI) / 3, euler));
-	windmillModels.push(new WindMill(Math.PI / 3, (4 * Math.PI) / 3, euler));
+	windmillModels.push(new WindMill(Math.PI, 0, euler));
+	windmillModels.push(new WindMill(Math.PI, (2 * Math.PI) / 4, euler));
+	windmillModels.push(new WindMill(Math.PI, (2 * Math.PI) / 5, euler));
 
 	renderer.shadowMap.enabled = true;
 	renderer.shadowMap.type = THREE.PCFSoftShadowMap;
