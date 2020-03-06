@@ -6,11 +6,24 @@ var lastTime = 0;
 var pageHasGraph = 0;
 var graphCounter = 1;
 
-// Models
-var houses, windmill, batery, floor, table, world, hus_Nisse, hus_rik, hus_GamerJon, hus_svensson, hus_Agneta, SolarPanels,
-	wateranimation;
+var dt = 0;
+var t = 0;
+var simTime = 0;
 
-//Moa leker
+// 3D Models
+var windmills,
+	floor,
+	table,
+	world,
+	houseStudent,
+	houseRich,
+	houseGamer,
+	houseSvensson,
+	houseElder,
+	SolarPanels,
+	water;
+
+// Moa leker
 var mixer;
 
 // Lights
@@ -24,18 +37,17 @@ const moonIntensity = 1.2;
 var sun, moon;
 const sunDistance = 2;
 
-
-
-// Models
-// var wind = new Wind(10, 2, 0.01);
-// var windmillModel = new WindMillModel(wind, 5000 * 3, 30, 0.04, 8);
-// var generator = new GeneratorModel(windmillModel, 0, 0.25, 1, 1);
-// const models = [wind, windmillModel, generator];
-
+// Simulation models
 var wind = new Wind(10, 5, 0.1);
-var windmillModel = new WindMill(0, euler);
+var windmillModels = [];
 var waterPlantModel = new WaterPlant(euler);
 var solarPanelModel = new SolarPanel(euler);
+
+var powerProduction = {
+	totalWind: 0,
+	totalWater: 0,
+	totalSolar: 0
+};
 
 // Colors
 // const skyColors = [
@@ -81,6 +93,11 @@ function init() {
 	loadModels();
 	setupLights();
 	setupGeometry();
+
+	// Simulation models setup
+	windmillModels.push(new WindMill(Math.PI / 2, 0, euler));
+	windmillModels.push(new WindMill(Math.PI, (2 * Math.PI) / 3, euler));
+	windmillModels.push(new WindMill(Math.PI / 3, (4 * Math.PI) / 3, euler));
 
 	renderer.shadowMap.enabled = true;
 	renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -136,7 +153,6 @@ function loadModels() {
 
 	// World
 	loader.load("Assets/Models/world.gltf", function(gltf) {
-
 		world = gltf.scene;
 
 		// World plane
@@ -150,85 +166,79 @@ function loadModels() {
 		scene.add(world);
 	});
 
-	// Houses
-	loader.load("Assets/Models/houses.gltf", function(gltf) {
-		houses = gltf.scene;
-		houses.traverse(function(child) {
-			if (child.isMesh) {
-				child.castShadow = false;
-				child.receiveShadow = true;
-			}
-		});
-		scene.add(houses);
-	});
 	// Student Nisse
 	loader.load("Assets/Models/hus_Nisse.gltf", function(gltf) {
-		hus_Nisse = gltf.scene;
-		hus_Nisse.traverse(function(child) {
+		houseStudent = gltf.scene;
+		houseStudent.traverse(function(child) {
 			if (child.isMesh) {
 				child.castShadow = false;
 				child.receiveShadow = true;
 			}
 		});
-		scene.add(hus_Nisse);
+		scene.add(houseStudent);
 	});
-	// Gamer Jönnson
-		loader.load("Assets/Models/hus_GamerJon.gltf", function(gltf) {
-		hus_GamerJon = gltf.scene;
-		hus_GamerJon.traverse(function(child) {
-			if (child.isMesh) {
-				child.castShadow = false;
-				child.receiveShadow = true;
-			}
-		});
-		scene.add(hus_GamerJon);
-	});
-	// Ensamma Agneta
-		loader.load("Assets/Models/hus_rik.gltf", function(gltf) {
-		hus_rik = gltf.scene;
-		hus_rik.traverse(function(child) {
-			if (child.isMesh) {
-				child.castShadow = false;
-				child.receiveShadow = true;
-			}
-		});
-		scene.add(hus_rik);
-	});
-	// Familjen Rik
-		loader.load("Assets/Models/hus_Agneta.gltf", function(gltf) {
-		hus_Agneta = gltf.scene;
-		hus_Agneta.traverse(function(child) {
-			if (child.isMesh) {
-				child.castShadow = false;
-				child.receiveShadow = true;
-			}
-		});
-		scene.add(hus_Agneta);
-	});
-	// Familjen Svensson
-		loader.load("Assets/Models/hus_svensson.gltf", function(gltf) {
-		hus_svensson = gltf.scene;
-		hus_svensson.traverse(function(child) {
-			if (child.isMesh) {
-				child.castShadow = false;
-				child.receiveShadow = true;
-			}
-		});
-		scene.add(hus_svensson);
-	});	
 
-	// Windmill
-	loader.load("Assets/Models/windmills.gltf", function(gltf) {
-		windmill = gltf.scene;
-		windmill.traverse(function(child) {
+	// Gamer Jönnson
+	loader.load("Assets/Models/hus_GamerJon.gltf", function(gltf) {
+		houseGamer = gltf.scene;
+		houseGamer.traverse(function(child) {
 			if (child.isMesh) {
 				child.castShadow = false;
 				child.receiveShadow = true;
 			}
 		});
-		scene.add(windmill);
+		scene.add(houseGamer);
 	});
-	// solarpanels
+
+	// Familjen Rik
+	loader.load("Assets/Models/hus_rik.gltf", function(gltf) {
+		houseRich = gltf.scene;
+		houseRich.traverse(function(child) {
+			if (child.isMesh) {
+				child.castShadow = false;
+				child.receiveShadow = true;
+			}
+		});
+		scene.add(houseRich);
+	});
+
+	// Ensamma Agneta
+	loader.load("Assets/Models/hus_Agneta.gltf", function(gltf) {
+		houseElder = gltf.scene;
+		houseElder.traverse(function(child) {
+			if (child.isMesh) {
+				child.castShadow = false;
+				child.receiveShadow = true;
+			}
+		});
+		scene.add(houseElder);
+	});
+
+	// Familjen Svensson
+	loader.load("Assets/Models/hus_svensson.gltf", function(gltf) {
+		houseSvensson = gltf.scene;
+		houseSvensson.traverse(function(child) {
+			if (child.isMesh) {
+				child.castShadow = false;
+				child.receiveShadow = true;
+			}
+		});
+		scene.add(houseSvensson);
+	});
+
+	// Windmills
+	loader.load("Assets/Models/windmills.gltf", function(gltf) {
+		windmills = gltf.scene;
+		windmills.traverse(function(child) {
+			if (child.isMesh) {
+				child.castShadow = false;
+				child.receiveShadow = true;
+			}
+		});
+		scene.add(windmills);
+	});
+
+	// Solarpanels
 	loader.load("Assets/Models/SolarPanels.gltf", function(gltf) {
 		SolarPanels = gltf.scene;
 		SolarPanels.traverse(function(child) {
@@ -239,34 +249,22 @@ function loadModels() {
 		});
 		scene.add(SolarPanels);
 	});
-	// Wateranimation
+
+	// Water
 	loader.load("Assets/Models/wateranimation.gltf", function(gltf) {
-		wateranimation = gltf.scene;
-		wateranimation.traverse(function(child) {
+		water = gltf.scene;
+		water.traverse(function(child) {
 			if (child.isMesh) {
 				child.castShadow = false;
 				child.receiveShadow = true;
 			}
-		
 		});
-		/*mixer = new THREE.AnimationMixer(wateranimation);
+		/*mixer = new THREE.AnimationMixer(water);
   		var clip1 = gltf.animations[0];
   		var action1 = mixer.clipAction(clip1);
   		action1.play();*/
-		scene.add(wateranimation);
-	});	
-
-	// Battery
-	/*loader.load("Assets/Models/battery.gltf", function(gltf) {
-		battery = gltf.scene;
-		battery.traverse(function(child) {
-			if (child.isMesh) {
-				child.castShadow = false;
-				child.receiveShadow = true;
-			}
-		});
-		scene.add(battery);
-	});*/
+		scene.add(water);
+	});
 }
 
 function setupLights() {
@@ -322,60 +320,34 @@ function setupGeometry() {
 /////////////////////////
 function animate(time) {
 	// Time is passed in milliseconds, calculate delta time
-	timeNow = time / 1000;
+	let timeNow = time / 1000;
 	dt = timeNow - lastTime;
 
 	// Simulation time in hours driven by t which is between 0 and 1
-	let t = (timeNow % dayLength) / dayLength;
-	let simTime = Math.round((6 + t * 24) % 24);
-
-	let dayX = Math.cos(t * 2 * Math.PI);
-	let dayY = Math.sin(t * 2 * Math.PI);
-
-	//console.log(`Time of day: ${simTime}`);
-
-	let sunX = dayX * sunDistance;
-	let sunY = dayY * sunDistance;
-	let lightX = dayX * lightDistance;
-	let lightY = dayY * lightDistance;
+	t = (timeNow % dayLength) / dayLength;
+	simTime = Math.round((6 + t * 24) % 24);
 
 	// Start graphs
 	stats.begin();
 
-	// TODO: Make intensity and opacity depend on timeOfDay
-	sunLight.position.set(lightX, lightY, 0);
-	sunLight.intensity = lerp(0, sunIntensity, dayY + 0.6);
-	moonLight.position.set(-lightX, -lightY, 0);
-	moonLight.intensity = lerp(0, moonIntensity, -dayY + 0.6);
+	handleDayNightCycle();
+	handleSimulationUpdates();
 
-	sun.visible = dayY > -0.6;
-	sun.position.set(sunX, sunY + 2, 0);
-	moon.visible = dayY < 0.6;
-	moon.position.set(-sunX, -sunY + 2, 0);
-
-	sun.material.opacity = lerp(0, 1, dayY + 0.6);
-	moon.material.opacity = lerp(0, 1, -dayY + 0.6);
-
-	scene.background = new THREE.Color("lightskyblue").lerp(
-		new THREE.Color(0x26265c),
-		clamp(0.4 + (-dayY + 1) / 2)
-	);
-
-	// Handle windmill simulation
-	wind.update(dt);
-	windmillModel.update(wind.windSpeed, dt);
-
-	// Handle water plant simulation
-	waterPlantModel.update(dt);
-
-	// Handle solar panel simulation
-	solarPanelModel.update(dt, simTime);
-	//console.log(`Solar power: ${solarPanelModel.p}`);
-
-	if (windmill) {
-		const rps = windmillModel.omega / (2 * Math.PI);
-		windmill.children[0].rotateX(dt * 2 * Math.PI * rps);
+	// Handle animation
+	if (windmills) {
+		windmillModels.forEach((model, idx) => {
+			// const rps = model.omega / (2 * Math.PI);
+			// windmills.children[idx * 2].rotateX(dt * 2 * Math.PI * rps);
+			let windmill = windmills.children[idx * 2];
+			windmill.rotation.set(
+				model.theta,
+				windmill.rotation.y,
+				windmill.rotation.z,
+				"ZYX"
+			);
+		});
 	}
+
 	// Moa leker runt här hej hopp
 	/*var deltatid = clock.getDelta()
 	mixer.update(deltatid); */
@@ -417,4 +389,52 @@ function lerp(from, to, t) {
 	// Clamp t between 0 and 1
 	t = clamp(t);
 	return (1 - t) * from + to * t;
+}
+
+function handleDayNightCycle() {
+	let dayX = Math.cos(t * 2 * Math.PI);
+	let dayY = Math.sin(t * 2 * Math.PI);
+
+	let sunX = dayX * sunDistance;
+	let sunY = dayY * sunDistance;
+	let lightX = dayX * lightDistance;
+	let lightY = dayY * lightDistance;
+
+	// TODO: Make intensity and opacity depend on simTime
+	sunLight.position.set(lightX, lightY, 0);
+	sunLight.intensity = lerp(0, sunIntensity, dayY + 0.6);
+	moonLight.position.set(-lightX, -lightY, 0);
+	moonLight.intensity = lerp(0, moonIntensity, -dayY + 0.6);
+
+	sun.visible = dayY > -0.6;
+	sun.position.set(sunX, sunY + 2, 0);
+	moon.visible = dayY < 0.6;
+	moon.position.set(-sunX, -sunY + 2, 0);
+
+	sun.material.opacity = lerp(0, 1, dayY + 0.6);
+	moon.material.opacity = lerp(0, 1, -dayY + 0.6);
+
+	scene.background = new THREE.Color("lightskyblue").lerp(
+		new THREE.Color(0x26265c),
+		clamp(0.4 + (-dayY + 1) / 2)
+	);
+}
+
+function handleSimulationUpdates() {
+	// Handle windmills simulation
+	wind.update(dt);
+	windmillModels.forEach(model => model.update(wind.windSpeed, dt));
+
+	// Handle water plant simulation
+	waterPlantModel.update(dt);
+
+	// Handle solar panel simulation
+	solarPanelModel.update(dt, simTime);
+
+	powerProduction.totalSolar = solarPanelModel.p;
+	powerProduction.totalWater = waterPlantModel.p;
+	powerProduction.totalWind = windmillModels.reduce(
+		(total, current) => total + current.p,
+		0
+	);
 }

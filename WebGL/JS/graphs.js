@@ -15,19 +15,26 @@ var graphContext;
 function initWindGraphs() {
 	// Wind
 	stats = new Stats();
-	windStrengthGraph = stats.addPanel( new Stats.Panel( 'Wind m/s', '#ff8', '#221' ) );
-	windElectricityGraph= stats.addPanel( new Stats.Panel( 'Electricity W', '#ff8', '#221' ) );
+	windStrengthGraph = stats.addPanel(
+		new Stats.Panel("Wind m/s", "#ff8", "#221")
+	);
+	windElectricityGraph = stats.addPanel(
+		new Stats.Panel("Electricity W", "#ff8", "#221")
+	);
 	createGraphCanvas();
 	//windElectricityStats.domElement.style.cssText ="position:absolute;top:0px;left:160px; width: 300px !important";
 	graphCounter = 1;
 }
 
 function initSunGraphs() {
-
 	// Sun
 	stats = new Stats();
-	sunIntensityGraph = stats.addPanel( new Stats.Panel( 'Sun Intensity', '#ff8', '#221' ) );
-	sunElectricityGraph= stats.addPanel( new Stats.Panel( 'Electricity W', '#ff8', '#221' ) );
+	sunIntensityGraph = stats.addPanel(
+		new Stats.Panel("Sun Intensity", "#ff8", "#221")
+	);
+	sunElectricityGraph = stats.addPanel(
+		new Stats.Panel("Electricity W", "#ff8", "#221")
+	);
 	createGraphCanvas();
 	graphCounter = 2;
 	//electricityStats.domElement.style.cssText ="position:absolute;top:0px;left:160px; width: 300px !important";
@@ -37,14 +44,16 @@ function initWaterGraphs() {
 	// Water
 	stats = new Stats();
 	createGraphCanvas();
-	waterElectricityGraph = stats.addPanel( new Stats.Panel( 'Waterplant W', '#ff8', '#221' ) );
+	waterElectricityGraph = stats.addPanel(
+		new Stats.Panel("Waterplant W", "#ff8", "#221")
+	);
 	graphCounter = 3;
 	//electricityStats.domElement.style.cssText ="position:absolute;top:0px;left:160px; width: 300px !important";
 }
 
 function createGraphCanvas() {
-	stats.showPanel( 3 );
-	document.body.appendChild( stats.dom );
+	stats.showPanel(3);
+	document.body.appendChild(stats.dom);
 	graphCanvas = document.createElement("canvas");
 	graphCanvas.width = 512;
 	graphCanvas.height = 512;
@@ -54,19 +63,18 @@ function createGraphCanvas() {
 }
 
 function updateGraphs(graphCounter) {
-
-	switch(graphCounter) {
+	switch (graphCounter) {
 		case 1:
-			windStrengthGraph.update(wind.windSpeed,20);
-			windElectricityGraph.update(windmillModel.p, Math.pow(10, 8));
-		break;
+			windStrengthGraph.update(wind.windSpeed, 20);
+			windElectricityGraph.update(powerProduction.totalWind, Math.pow(10, 9));
+			break;
 
 		case 2:
-			sunIntensityGraph.update(solarPanelModel.irradiation,2000);
-			sunElectricityGraph.update(solarPanelModel.p, Math.pow(10, 8));
-		break;
+			sunIntensityGraph.update(solarPanelModel.irradiation, 2000);
+			sunElectricityGraph.update(powerProduction.totalSolar, Math.pow(10, 8));
+			break;
 		case 3:
-			waterElectricityGraph.update(waterPlantModel.p,Math.pow(10, 7))
-		break;
+			waterElectricityGraph.update(powerProduction.totalWater, Math.pow(10, 7));
+			break;
 	}
 }

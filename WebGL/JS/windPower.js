@@ -18,9 +18,9 @@ const R = 0.25;
 const L = 0.01;
 
 class WindMill {
-	constructor(startingRotation, solver) {
+	constructor(startingVelocity, startingRotation, solver) {
 		this.alpha = 0;
-		this.omega = Math.PI;
+		this.omega = startingVelocity;
 		this.theta = startingRotation;
 
 		this.i = 0;
@@ -38,10 +38,6 @@ class WindMill {
 		let breakingTorque = this.calculateBreakingTorque(windSpeed);
 		let torque = Math.max(0, windTorque - breakingTorque);
 
-		/*console.log(
-			`Wind torque: ${windTorque} Breaking torque: ${breakingTorque}`
-		);
-		*/
 		// Do windmill updates
 		this.alpha = torque / J;
 		this.omega = this.solver(this.omega, dt, this.alpha);
