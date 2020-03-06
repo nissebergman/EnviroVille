@@ -18,7 +18,7 @@ const R = 0.25;
 const L = 0.01;
 
 class WindMill {
-	constructor(startingVelocity, startingRotation, solver) {
+	constructor(particleThreshold, startingVelocity, startingRotation, solver) {
 		this.alpha = 0;
 		this.omega = startingVelocity;
 		this.theta = startingRotation;
@@ -29,6 +29,11 @@ class WindMill {
 		this.energy = 0;
 
 		this.solver = solver;
+		this.particleThreshold = particleThreshold;
+	}
+
+	connectParticleStream(particleStream) {
+		this.particleStream = particleStream;
 	}
 
 	update(windSpeed, dt) {
@@ -46,8 +51,15 @@ class WindMill {
 		// Do generator updates
 		this.i = torque / K1;
 		this.u = R * this.i + K2 * this.omega;
-		this.p = (this.u * this.i)/1000;
+		this.p = (this.u * this.i) / 1000;
 		this.energy = this.solver(this.energy, dt, this.p);
+
+		// Particle stream visualization
+		if (this.particleStream && this.energy >= this.particleThreshold) {
+			let toSpawn = Math.floor(this.energy / this.particleThreshold);
+			this.particleStream.queueParticleSpawns(toSpawn);
+			this.energy -= this.particleThreshold;
+		}
 	}
 
 	calculateBreakingTorque(windSpeed) {
