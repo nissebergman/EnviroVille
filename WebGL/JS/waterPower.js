@@ -21,8 +21,6 @@ class WaterPlant {
 		this.p = (N * water_rho * Q * g * H) / 1000;
 		this.energy = this.solver(this.energy, dt, this.p);
 
-		console.log(`Water plant energy: ${this.energy}`);
-
 		// Particle stream visualization
 		if (this.particleStream && this.energy >= this.particleThreshold) {
 			let toSpawn = Math.floor(this.energy / this.particleThreshold);
