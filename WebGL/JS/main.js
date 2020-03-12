@@ -385,7 +385,7 @@ function loadModels() {
 	});
 
 	// Solar panels
-	loader.load("Assets/Models/solarPanels.gltf", function(gltf) {
+	loader.load("Assets/Models/SolarPanels.gltf", function(gltf) {
 		solarPanels = gltf.scene;
 		solarPanels.traverse(function(child) {
 			if (child.isMesh) {
