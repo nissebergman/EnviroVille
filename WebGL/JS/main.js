@@ -6,6 +6,7 @@ var lastTime = 0;
 var pageHasGraph = 0;
 var graphCounter = 1;
 
+
 var dt = 0;
 var t = 0;
 var simTime = 0;
@@ -22,10 +23,9 @@ var windmills,
 	houseElder,
 	SolarPanels,
 	water,
-	gauge;
+	gauge,
+	skog;
 
-// Moa leker
-var mixer;
 
 // Lights
 var sunLight, ambientLight;
@@ -159,6 +159,8 @@ function init() {
 	requestAnimationFrame(animate);
 }
 
+// MOAS class
+
 function loadModels() {
 	const loader = new THREE.GLTFLoader();
 
@@ -201,6 +203,18 @@ function loadModels() {
 		world.children[1].receiveShadow = false;
 
 		scene.add(world);
+	});
+
+	//Skog
+	loader.load("Assets/Models/skog.gltf", function(gltf) {
+		skog = gltf.scene;
+		skog.traverse(function(child) {
+			if (child.isMesh) {
+				child.castShadow = false;
+				child.receiveShadow = true;
+			}
+		});
+		scene.add(skog);
 	});
 
 	// Student Nisse
@@ -289,7 +303,7 @@ function loadModels() {
 	});
 
 	// Solarpanels
-	loader.load("Assets/Models/SolarPanels.gltf", function(gltf) {
+	loader.load("Assets/Models/SolparPanels.gltf", function(gltf) {
 		SolarPanels = gltf.scene;
 		SolarPanels.traverse(function(child) {
 			if (child.isMesh) {
@@ -391,6 +405,12 @@ function setupGeometry() {
 	scene.add(sun);
 	scene.add(moon);
 }
+// MOAS
+
+
+
+
+
 
 /////////////////////////
 //      Rendering      //
@@ -425,6 +445,7 @@ function animate(time) {
 			);
 		});
 	}
+
 
 	// Draw graphs
 	graphContext.beginPath();
