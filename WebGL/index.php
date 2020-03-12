@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title></title>
+        <title>Microgrid TNM085</title>
         <meta
             name="viewport"
             content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
@@ -102,7 +102,6 @@
         <script src="JS/solarPower.js"></script>
         <script src="JS/consumption.js"></script>
         <script src="JS/particles.js"></script>
-
         <link rel="stylesheet" href="Style/style.css" />
     </head>
     <body>
