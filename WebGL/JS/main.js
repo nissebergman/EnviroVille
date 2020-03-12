@@ -6,7 +6,6 @@ var lastTime = 0;
 var pageHasGraph = 0;
 var graphCounter = 1;
 
-
 var dt = 0;
 var t = 0;
 var simTime = 0;
@@ -26,7 +25,6 @@ var windmills,
 	gauge,
 	skog,
 	gaugePointer;
-
 
 // Lights
 var sunLight, ambientLight;
@@ -67,6 +65,7 @@ var powerConsumption = {
 	totalRich: 0,
 	totalSvensson: 0
 };
+
 
 // Surplus or defecit
 var powerResult = 0;
@@ -135,7 +134,7 @@ function init() {
 	windmillModels.push(new WindMill(10000, Math.PI, 0, euler));
 	windmillModels.push(new WindMill(10000, Math.PI, (2 * Math.PI) / 4, euler));
 	windmillModels.push(new WindMill(10000, Math.PI, (2 * Math.PI) / 5, euler));
-	waterPlantModel = new WaterPlant(5000, euler);
+	waterPlantModel = new WaterPlant(10000, euler);
 	solarPanelModel = new SolarPanel(1, euler);
 
 	// Particle streams setup
@@ -158,27 +157,27 @@ function init() {
 		scene,
 		consumptionParticleColor,
 		0.015
-	)
+	);
 	consumptionParticles.gamer = new ParticleStream(
 		scene,
 		consumptionParticleColor,
 		0.015
-	)
+	);
 	consumptionParticles.rich = new ParticleStream(
 		scene,
 		consumptionParticleColor,
 		0.015
-	)
+	);
 	consumptionParticles.elder = new ParticleStream(
 		scene,
 		consumptionParticleColor,
 		0.015
-	)
+	);
 	consumptionParticles.svensson = new ParticleStream(
 		scene,
 		consumptionParticleColor,
 		0.015
-	)
+	);
 
 	renderer.shadowMap.enabled = true;
 	renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -202,16 +201,11 @@ function init() {
 	window.addEventListener("resize", resizeRenderer);
 
 	// Start animation loop
-
 	requestAnimationFrame(animate);
 }
 
-// MOAS class
-
 function loadModels() {
 	const loader = new THREE.GLTFLoader();
-
-	var houseGroup = [];
 
 	// Plank floor
 	loader.load("Assets/Models/floor.gltf", function(gltf) {
@@ -275,9 +269,7 @@ function loadModels() {
 		});
 
 		// Handle particle stream
-		consumptionParticles.student.setEndPos(
-			houseStudent.children[0].position
-		);
+		consumptionParticles.student.setEndPos(houseStudent.children[0].position);
 		studentConsumption.connectParticleStream(consumptionParticles.student);
 
 		scene.add(houseStudent);
@@ -296,9 +288,7 @@ function loadModels() {
 		});
 
 		// Handle particle stream
-		consumptionParticles.gamer.setEndPos(
-			houseGamer.children[0].position
-		);
+		consumptionParticles.gamer.setEndPos(houseGamer.children[0].position);
 		gamerConsumption.connectParticleStream(consumptionParticles.gamer);
 
 		scene.add(houseGamer);
@@ -316,9 +306,7 @@ function loadModels() {
 		});
 
 		// Handle particle stream
-		consumptionParticles.rich.setEndPos(
-			houseRich.children[0].position
-		);
+		consumptionParticles.rich.setEndPos(houseRich.children[0].position);
 		richConsumption.connectParticleStream(consumptionParticles.rich);
 
 		scene.add(houseRich);
@@ -336,9 +324,7 @@ function loadModels() {
 		});
 
 		// Handle particle stream
-		consumptionParticles.elder.setEndPos(
-			houseElder.children[0].position
-		);
+		consumptionParticles.elder.setEndPos(houseElder.children[0].position);
 		elderConsumption.connectParticleStream(consumptionParticles.elder);
 
 		scene.add(houseElder);
@@ -356,9 +342,7 @@ function loadModels() {
 		});
 
 		// Handle particle stream
-		consumptionParticles.svensson.setEndPos(
-			houseSvensson.children[0].position
-		);
+		consumptionParticles.svensson.setEndPos(houseSvensson.children[0].position);
 		svenssonConsumption.connectParticleStream(consumptionParticles.svensson);
 
 		scene.add(houseSvensson);
@@ -389,8 +373,8 @@ function loadModels() {
 		scene.add(windmills);
 	});
 
-	// solarPanels
-	loader.load("Assets/Models/SolparPanels.gltf", function(gltf) {
+	// Solar panels
+	loader.load("Assets/Models/solarPanels.gltf", function(gltf) {
 		solarPanels = gltf.scene;
 		solarPanels.traverse(function(child) {
 			if (child.isMesh) {
@@ -420,12 +404,12 @@ function loadModels() {
 			}
 		});
 
-		// Connect as endPos
+		// Connect as endPos to particle streams
 		for (particleStream of Object.values(productionParticles)) {
 			particleStream.setEndPos(gauge.children[0].position);
 		}
 
-		// Connect as startPos
+		// Connect as startPos to particle streams
 		for (particleStream of Object.values(consumptionParticles)) {
 			particleStream.setStartPos(gauge.children[0].position);
 		}
@@ -499,12 +483,6 @@ function setupGeometry() {
 	scene.add(sun);
 	scene.add(moon);
 }
-// MOAS
-
-
-
-
-
 
 /////////////////////////
 //      Rendering      //
@@ -537,6 +515,7 @@ function animate(time) {
 			);
 		});
 	}
+
 	// Handle gauge animation
 	let gaugeDriver = (powerResult / valueSpan + 1) / 2;
 	let gaugeAngle = lerp(-angleSpan, angleSpan, gaugeDriver);
