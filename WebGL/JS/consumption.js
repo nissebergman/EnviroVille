@@ -31,20 +31,30 @@ data = [
 	}
 ];
 
+const householdParticleThreshold = 1;
+
 class Household {
-	constructor(type, amount) {
+	constructor(type, amount, solver) {
 		this.amount = amount;
 		this.type = type;
 		this.displayMessage = "";
-		
+
 		// Consumption
 		this.totalConsumption = 0;
 		this.perHouseholdConsumption = 0;
+
+		// Used for particles, essentially a kW-count
+		this.solver = solver;
+		this.energy = 0;
 	}
 
 	// Connect type of household to correct data
 	connect(type) {
 		return data.find(household => household.type === type);
+	}
+
+	connectParticleStream(particleStream) {
+		this.particleStream = particleStream;
 	}
 
 	calculatePerHousehold(simTime) {
@@ -60,6 +70,15 @@ class Household {
 		this.perHouseholdConsumption = this.calculatePerHousehold(simTime);
 		this.totalConsumption = this.calculateTotal(simTime);
 		this.displayMessage = `${this.amount}st ${this.type}-hushåll konsumerar ${this.perHouseholdConsumption}kW per hushåll och totalt ${this.totalConsumption}kW`;
+
+		// Particle stream visualization
+		this.energy = this.solver(this.energy, dt, this.totalConsumption);
+
+		if (this.particleStream && this.energy >= householdParticleThreshold) {
+			let toSpawn = Math.floor(this.energy / householdParticleThreshold);
+			this.particleStream.queueParticleSpawns(toSpawn);
+			this.energy -= householdParticleThreshold;
+		}
 	}
 
 	timeOfDay(simTime) {
