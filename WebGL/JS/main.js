@@ -22,7 +22,8 @@ var windmills,
 	houseElder,
 	SolarPanels,
 	water,
-	gauge;
+	gauge,
+	gaugePointer;
 
 // Moa leker
 var mixer;
@@ -45,18 +46,34 @@ var windmillModels = [];
 var waterPlantModel;
 var solarPanelModel;
 
-//
+// Consumption models
 var studentConsumption = new Household("student", 1);
 var gamerConsumption = new Household("gamer", 1);
 var elderConsumption = new Household("elder", 1);
 var richConsumption = new Household("rich", 1);
 var svenssonConsumption = new Household("svensson", 1);
 
+// Objects for holding total production/consumption in Watts
 var powerProduction = {
 	totalWind: 0,
 	totalWater: 0,
 	totalSolar: 0
 };
+
+var powerConsumption = {
+	totalStudent: 0,
+	totalGamer: 0,
+	totalElder: 0,
+	totalRich: 0,
+	totalSvensson: 0
+};
+
+// Surplus or defecit
+var powerResult = 0;
+
+// Gauge properties
+const angleSpan = (2 * Math.PI) / 3;
+const valueSpan = 150e3;
 
 // Particle stream visualizations objects and properties
 const productionParticleColor = 0xaaff11;
@@ -310,6 +327,8 @@ function loadModels() {
 	// Gauge
 	loader.load("Assets/Models/gauge.gltf", function(gltf) {
 		gauge = gltf.scene;
+		gaugePointer = gauge.children[2];
+
 		gauge.traverse(function(child) {
 			if (child.isMesh) {
 				child.castShadow = false;
@@ -411,11 +430,9 @@ function animate(time) {
 	handleSimulationUpdates();
 	handleParticleStreams();
 
-	// Handle animation
+	// Handle windmill animation
 	if (windmills) {
 		windmillModels.forEach((model, idx) => {
-			// const rps = model.omega / (2 * Math.PI);
-			// windmills.children[idx * 2].rotateX(dt * 2 * Math.PI * rps);
 			let windmill = windmills.children[idx * 2];
 			windmill.rotation.set(
 				model.theta,
@@ -424,6 +441,17 @@ function animate(time) {
 				"ZYX"
 			);
 		});
+	}
+
+	// Handle gauge animation
+	let gaugeDriver = (powerResult / valueSpan + 1) / 2;
+	let gaugeAngle = lerp(-angleSpan, angleSpan, gaugeDriver);
+	if (gaugePointer) {
+		gaugePointer.rotation.set(
+			gaugePointer.rotation.x,
+			-gaugeAngle,
+			gaugePointer.rotation.z
+		);
 	}
 
 	// Draw graphs
@@ -443,8 +471,9 @@ function animate(time) {
 	lastTime = timeNow;
 	requestAnimationFrame(animate);
 }
-	//For raycasting
-window.addEventListener( 'mousemove', onMouseMove, false );
+
+// For raycasting
+window.addEventListener("mousemove", onMouseMove, false);
 
 ///////////////////////
 //      Helpers      //
@@ -523,6 +552,25 @@ function handleSimulationUpdates() {
 		(total, current) => total + current.p,
 		0
 	);
+
+	// Store current consumption in Watts in a global object
+	powerConsumption.totalStudent = studentConsumption.totalConsumption * 1000;
+	powerConsumption.totalGamer = gamerConsumption.totalConsumption * 1000;
+	powerConsumption.totalElder = elderConsumption.totalConsumption * 1000;
+	powerConsumption.totalRich = richConsumption.totalConsumption * 1000;
+	powerConsumption.totalSvensson = svenssonConsumption.totalConsumption * 1000;
+
+	powerResult = 0;
+	// Calculate global surplus or defecit (powerProduction - powerConsumption)
+	for (produced of Object.values(powerProduction)) {
+		powerResult += produced;
+	}
+
+	for (consumed of Object.values(powerConsumption)) {
+		powerResult -= consumed;
+	}
+
+	console.log(`Power result: ${powerResult}W`);
 }
 
 function handleParticleStreams() {
