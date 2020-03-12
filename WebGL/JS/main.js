@@ -6,6 +6,7 @@ var lastTime = 0;
 var pageHasGraph = 0;
 var graphCounter = 1;
 
+
 var dt = 0;
 var t = 0;
 var simTime = 0;
@@ -20,13 +21,12 @@ var windmills,
 	houseGamer,
 	houseSvensson,
 	houseElder,
-	SolarPanels,
+	solarPanels,
 	water,
 	gauge,
+	skog,
 	gaugePointer;
 
-// Moa leker
-var mixer;
 
 // Lights
 var sunLight, ambientLight;
@@ -206,6 +206,8 @@ function init() {
 	requestAnimationFrame(animate);
 }
 
+// MOAS class
+
 function loadModels() {
 	const loader = new THREE.GLTFLoader();
 
@@ -248,6 +250,18 @@ function loadModels() {
 		world.children[1].receiveShadow = false;
 
 		scene.add(world);
+	});
+
+	//Skog
+	loader.load("Assets/Models/skog.gltf", function(gltf) {
+		skog = gltf.scene;
+		skog.traverse(function(child) {
+			if (child.isMesh) {
+				child.castShadow = false;
+				child.receiveShadow = true;
+			}
+		});
+		scene.add(skog);
 	});
 
 	// Student Nisse
@@ -375,10 +389,10 @@ function loadModels() {
 		scene.add(windmills);
 	});
 
-	// Solarpanels
-	loader.load("Assets/Models/SolarPanels.gltf", function(gltf) {
-		SolarPanels = gltf.scene;
-		SolarPanels.traverse(function(child) {
+	// solarPanels
+	loader.load("Assets/Models/SolparPanels.gltf", function(gltf) {
+		solarPanels = gltf.scene;
+		solarPanels.traverse(function(child) {
 			if (child.isMesh) {
 				child.castShadow = false;
 				child.receiveShadow = true;
@@ -387,11 +401,11 @@ function loadModels() {
 
 		// Handle particle stream
 		productionParticles.solarPanels.setStartPos(
-			SolarPanels.children[5].position
+			solarPanels.children[5].position
 		);
 		solarPanelModel.connectParticleStream(productionParticles.solarPanels);
 
-		scene.add(SolarPanels);
+		scene.add(solarPanels);
 	});
 
 	// Gauge
@@ -485,6 +499,12 @@ function setupGeometry() {
 	scene.add(sun);
 	scene.add(moon);
 }
+// MOAS
+
+
+
+
+
 
 /////////////////////////
 //      Rendering      //
@@ -517,7 +537,6 @@ function animate(time) {
 			);
 		});
 	}
-
 	// Handle gauge animation
 	let gaugeDriver = (powerResult / valueSpan + 1) / 2;
 	let gaugeAngle = lerp(-angleSpan, angleSpan, gaugeDriver);
