@@ -44,7 +44,7 @@ function updateRaycaster() {
 				showToolTip(houseType);
 			}
 			if (d.object.name == "tak019") {
-				houseType = gamerConsumption;
+				houseType = svenssonConsumption;
 				showToolTip(houseType);
 			}
 		})
