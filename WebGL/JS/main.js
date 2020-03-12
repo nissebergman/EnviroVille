@@ -5,6 +5,8 @@ var scene, camera, renderer, controls;
 var lastTime = 0;
 var pageHasGraph = 0;
 var graphCounter = 1;
+var mixer;
+var clock = new THREE.Clock();
 
 var dt = 0;
 var t = 0;
@@ -45,11 +47,11 @@ var waterPlantModel;
 var solarPanelModel;
 
 // Consumption models
-var studentConsumption = new Household("student", 1, euler);
-var gamerConsumption = new Household("gamer", 1, euler);
-var elderConsumption = new Household("elder", 1, euler);
-var richConsumption = new Household("rich", 1, euler);
-var svenssonConsumption = new Household("svensson", 1, euler);
+var studentConsumption = new Household("Student", 50, euler);
+var gamerConsumption = new Household("Gamer", 50, euler);
+var elderConsumption = new Household("Pensionär", 50, euler);
+var richConsumption = new Household("Rik", 50, euler);
+var svenssonConsumption = new Household("Medelsvensson", 50, euler);
 
 // Objects for holding total production/consumption in Watts
 var powerProduction = {
@@ -113,6 +115,9 @@ var tooltipEnabledObjects = [];
 //      Setup      //
 /////////////////////
 function init() {
+
+	// Animation
+
 	// Camera parameters
 	const fov = 45;
 	const ratio = window.innerWidth / window.innerHeight;
@@ -276,7 +281,7 @@ function loadModels() {
 		tooltipEnabledObjects.push(houseStudent);
 	});
 
-	// Gamer Jönnson
+	// Gamer Jönsson
 	loader.load("Assets/Models/hus_GamerJon.gltf", function(gltf) {
 		houseGamer = gltf.scene;
 		houseGamer.name = "houseGamer";
@@ -420,6 +425,8 @@ function loadModels() {
 	// Water
 	loader.load("Assets/Models/wateranimation.gltf", function(gltf) {
 		water = gltf.scene;
+		mixer = new THREE.AnimationMixer(gltf.scene);
+		gltf.animations.forEach((clip) => {mixer.clipAction(clip).play();});
 		water.traverse(function(child) {
 			if (child.isMesh) {
 				child.castShadow = false;
@@ -488,10 +495,13 @@ function setupGeometry() {
 //      Rendering      //
 /////////////////////////
 function animate(time) {
+
+	if(water){
+	mixer.update(dt);
+	}
 	// Time is passed in milliseconds, calculate delta time
 	let timeNow = time / 1000;
 	dt = timeNow - lastTime;
-
 	// Simulation time in hours driven by t which is between 0 and 1
 	t = (timeNow % dayLength) / dayLength;
 	simTime = Math.round((6 + t * 24) % 24);
@@ -617,6 +627,7 @@ function handleSimulationUpdates() {
 	gamerConsumption.update(dt, simTime);
 	elderConsumption.update(dt, simTime);
 	svenssonConsumption.update(dt, simTime);
+	richConsumption.update(dt, simTime);
 
 	// Store current production in Watts in a global object
 	powerProduction.totalSolar = solarPanelModel.p;
