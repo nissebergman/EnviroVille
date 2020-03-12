@@ -24,7 +24,7 @@ body {
 
 .graphs {
 	transition: opacity .5s ease-in-out;
-	opacity: 0.2;
+	opacity: 0.3;
 }
 
 .graphs:hover {

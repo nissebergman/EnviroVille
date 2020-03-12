@@ -1,9 +1,11 @@
 var raycaster = new THREE.Raycaster();
 var mouse = new THREE.Vector2(), INTERSECTED;
 var houseType;
+var houseName;
 var tooltipIsEmpty;
 var tooltipx;
 var tooltipy;
+var updateTooltip;
 
 // Calculate mouse position
 function onMouseMove(event) {
@@ -26,23 +28,23 @@ function updateRaycaster() {
 		intersects.map(function(d) {
 			//tak 016,001,017,018,019
 			if (d.object.name == "tak001") {
-				houseType = "gamer";
+				houseType = studentConsumption;
 				showToolTip(houseType);
 			}
 			if (d.object.name == "tak016") {
-				houseType = "student";
+				houseType = gamerConsumption;
 				showToolTip(houseType);
 			}
 			if (d.object.name == "tak018") {
-				houseType = "rik";
+				houseType = richConsumption;
 				showToolTip(houseType);
 			}
 			if (d.object.name == "tak017") {
-				houseType = "agneta";
+				houseType = elderConsumption;
 				showToolTip(houseType);
 			}
 			if (d.object.name == "tak019") {
-				houseType = "svensson";
+				houseType = svenssonConsumption;
 				showToolTip(houseType);
 			}
 		})
@@ -53,14 +55,22 @@ function updateRaycaster() {
 }
 
 function showToolTip(type) {
-	var divElement = $("#houseInfo");
+		var divElement = $("#houseInfo");
+	if (type.totalConsumption != updateTooltip) {
+		divElement.empty();
+		tooltipIsEmpty = true;
+	}
 		divElement.css({
 		display: "block",
 		opacity: 1,
 		top: tooltipy,
 		left: tooltipx
 	});
-		if (tooltipIsEmpty) divElement.append("Detta är " + type);
+		if (tooltipIsEmpty) divElement.append("Detta är " + type.amount + 
+			" hushåll av typen " + type.type + ". \n"  
+			+ " De förbrukar just nu " + type.totalConsumption.toFixed(3) + 
+			"kW.");
+		updateTooltip = type.totalConsumption;
 		tooltipIsEmpty = false;
 }
 

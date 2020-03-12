@@ -1,30 +1,30 @@
 data = [
 	{
-		type: "student",
+		type: "Student",
 		morning: 8 / 24,
 		evening: 23 / 24,
 		night: 16 / 24
 	},
 	{
-		type: "gamer",
+		type: "Gamer",
 		morning: 12 / 24,
 		evening: 22 / 24,
 		night: 40 / 24
 	},
 	{
-		type: "elder",
+		type: "Pensionär",
 		morning: 18 / 24,
 		evening: 18 / 24,
 		night: 7 / 24
 	},
 	{
-		type: "rich",
+		type: "Rik",
 		morning: 30 / 24,
 		evening: 50 / 24,
 		night: 30 / 24
 	},
 	{
-		type: "svensson",
+		type: "Medelsvensson",
 		morning: 19 / 24,
 		evening: 30 / 24,
 		night: 19 / 24
