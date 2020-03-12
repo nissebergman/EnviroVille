@@ -47,11 +47,11 @@ var waterPlantModel;
 var solarPanelModel;
 
 // Consumption models
-var studentConsumption = new Household("student", 1, euler);
-var gamerConsumption = new Household("gamer", 1, euler);
-var elderConsumption = new Household("elder", 1, euler);
-var richConsumption = new Household("rich", 1, euler);
-var svenssonConsumption = new Household("svensson", 1, euler);
+var studentConsumption = new Household("Student", 50, euler);
+var gamerConsumption = new Household("Gamer", 50, euler);
+var elderConsumption = new Household("Pensionär", 50, euler);
+var richConsumption = new Household("Rik", 50, euler);
+var svenssonConsumption = new Household("Medelsvensson", 50, euler);
 
 // Objects for holding total production/consumption in Watts
 var powerProduction = {
@@ -619,6 +619,7 @@ function handleSimulationUpdates() {
 	gamerConsumption.update(dt, simTime);
 	elderConsumption.update(dt, simTime);
 	svenssonConsumption.update(dt, simTime);
+	richConsumption.update(dt, simTime);
 
 	// Store current production in Watts in a global object
 	powerProduction.totalSolar = solarPanelModel.p;
