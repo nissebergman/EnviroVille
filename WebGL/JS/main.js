@@ -5,6 +5,8 @@ var scene, camera, renderer, controls;
 var lastTime = 0;
 var pageHasGraph = 0;
 var graphCounter = 1;
+var mixer;
+var clock = new THREE.Clock();
 
 
 var dt = 0;
@@ -114,6 +116,9 @@ var tooltipEnabledObjects = [];
 //      Setup      //
 /////////////////////
 function init() {
+
+	// Animation
+
 	// Camera parameters
 	const fov = 45;
 	const ratio = window.innerWidth / window.innerHeight;
@@ -284,7 +289,7 @@ function loadModels() {
 		tooltipEnabledObjects.push(houseStudent);
 	});
 
-	// Gamer Jönnson
+	// Gamer Jönsson
 	loader.load("Assets/Models/hus_GamerJon.gltf", function(gltf) {
 		houseGamer = gltf.scene;
 		houseGamer.name = "houseGamer";
@@ -436,6 +441,8 @@ function loadModels() {
 	// Water
 	loader.load("Assets/Models/wateranimation.gltf", function(gltf) {
 		water = gltf.scene;
+		mixer = new THREE.AnimationMixer(gltf.scene);
+		gltf.animations.forEach((clip) => {mixer.clipAction(clip).play();});
 		water.traverse(function(child) {
 			if (child.isMesh) {
 				child.castShadow = false;
@@ -499,21 +506,18 @@ function setupGeometry() {
 	scene.add(sun);
 	scene.add(moon);
 }
-// MOAS
-
-
-
-
-
 
 /////////////////////////
 //      Rendering      //
 /////////////////////////
 function animate(time) {
+
+	if(water){
+	mixer.update(dt);
+	}
 	// Time is passed in milliseconds, calculate delta time
 	let timeNow = time / 1000;
 	dt = timeNow - lastTime;
-
 	// Simulation time in hours driven by t which is between 0 and 1
 	t = (timeNow % dayLength) / dayLength;
 	simTime = Math.round((6 + t * 24) % 24);
