@@ -40,15 +40,30 @@ const sunDistance = 2;
 
 // Simulation models
 var wind = new Wind(10, 5, 0.1);
+var clouds = new Clouds(0.8, 0.05);
 var windmillModels = [];
-var waterPlantModel = new WaterPlant(euler);
-var solarPanelModel = new SolarPanel(euler);
+var waterPlantModel;
+var solarPanelModel;
+
+//
+var studentConsumption = new Household("student", 1);
+var gamerConsumption = new Household("gamer", 1);
+var elderConsumption = new Household("elder", 1);
+var richConsumption = new Household("rich", 1);
+var svenssonConsumption = new Household("svensson", 1);
 
 var powerProduction = {
 	totalWind: 0,
 	totalWater: 0,
 	totalSolar: 0
 };
+
+// Particle stream visualizations objects and properties
+const productionParticleColor = 0xaaff11;
+const consumptionParticleColor = 0xff8855;
+
+var productionParticles = {};
+var consumptionParticles = {};
 
 // Colors
 // const skyColors = [
@@ -96,9 +111,28 @@ function init() {
 	setupGeometry();
 
 	// Simulation models setup
-	windmillModels.push(new WindMill(Math.PI / 2, 0, euler));
-	windmillModels.push(new WindMill(Math.PI, (2 * Math.PI) / 3, euler));
-	windmillModels.push(new WindMill(Math.PI / 3, (4 * Math.PI) / 3, euler));
+	windmillModels.push(new WindMill(10000, Math.PI, 0, euler));
+	windmillModels.push(new WindMill(10000, Math.PI, (2 * Math.PI) / 4, euler));
+	windmillModels.push(new WindMill(10000, Math.PI, (2 * Math.PI) / 5, euler));
+	waterPlantModel = new WaterPlant(5000, euler);
+	solarPanelModel = new SolarPanel(1, euler);
+
+	// Particle streams setup
+	productionParticles.windmills = new ParticleStream(
+		scene,
+		productionParticleColor,
+		0.008
+	);
+	productionParticles.waterPlant = new ParticleStream(
+		scene,
+		productionParticleColor,
+		0.008
+	);
+	productionParticles.solarPanels = new ParticleStream(
+		scene,
+		productionParticleColor,
+		0.005
+	);
 
 	renderer.shadowMap.enabled = true;
 	renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -127,6 +161,8 @@ function init() {
 
 function loadModels() {
 	const loader = new THREE.GLTFLoader();
+
+	var houseGroup = [];
 
 	// Plank floor
 	loader.load("Assets/Models/floor.gltf", function(gltf) {
@@ -182,6 +218,7 @@ function loadModels() {
 	// Gamer Jönnson
 	loader.load("Assets/Models/hus_GamerJon.gltf", function(gltf) {
 		houseGamer = gltf.scene;
+		houseGamer.name = "houseGamer";
 		houseGamer.traverse(function(child) {
 			if (child.isMesh) {
 				child.castShadow = false;
@@ -236,6 +273,18 @@ function loadModels() {
 				child.receiveShadow = true;
 			}
 		});
+
+		// Handle particle stream
+		let medianPos = new THREE.Vector3()
+			.add(windmills.children[0].position)
+			.add(windmills.children[2].position)
+			.add(windmills.children[4].position)
+			.multiplyScalar(1 / 3);
+		productionParticles.windmills.setStartPos(medianPos);
+		windmillModels.forEach(model =>
+			model.connectParticleStream(productionParticles.windmills)
+		);
+
 		scene.add(windmills);
 	});
 
@@ -248,6 +297,13 @@ function loadModels() {
 				child.receiveShadow = true;
 			}
 		});
+
+		// Handle particle stream
+		productionParticles.solarPanels.setStartPos(
+			SolarPanels.children[0].position
+		);
+		solarPanelModel.connectParticleStream(productionParticles.solarPanels);
+
 		scene.add(SolarPanels);
 	});
 
@@ -260,6 +316,12 @@ function loadModels() {
 				child.receiveShadow = true;
 			}
 		});
+
+		// Connect as endPos
+		for (particleStream of Object.values(productionParticles)) {
+			particleStream.setEndPos(gauge.children[0].position);
+		}
+
 		scene.add(gauge);
 	});
 
@@ -272,8 +334,15 @@ function loadModels() {
 				child.receiveShadow = true;
 			}
 		});
+
+		// Handle particle stream
+		productionParticles.waterPlant.setStartPos(water.children[0].position);
+		waterPlantModel.connectParticleStream(productionParticles.waterPlant);
+
 		scene.add(water);
 	});
+
+	// Put houses into a group to be able to select them
 }
 
 function setupLights() {
@@ -323,7 +392,6 @@ function setupGeometry() {
 	scene.add(moon);
 }
 
-
 /////////////////////////
 //      Rendering      //
 /////////////////////////
@@ -341,6 +409,7 @@ function animate(time) {
 
 	handleDayNightCycle();
 	handleSimulationUpdates();
+	handleParticleStreams();
 
 	// Handle animation
 	if (windmills) {
@@ -361,6 +430,8 @@ function animate(time) {
 	graphContext.beginPath();
 	graphContext.fill();
 
+	updateRaycaster();
+
 	renderer.render(scene, camera);
 
 	// End graphs
@@ -372,6 +443,8 @@ function animate(time) {
 	lastTime = timeNow;
 	requestAnimationFrame(animate);
 }
+	//For raycasting
+window.addEventListener( 'mousemove', onMouseMove, false );
 
 ///////////////////////
 //      Helpers      //
@@ -434,12 +507,30 @@ function handleSimulationUpdates() {
 	waterPlantModel.update(dt);
 
 	// Handle solar panel simulation
-	solarPanelModel.update(dt, simTime);
+	clouds.update(dt);
+	solarPanelModel.update(dt, simTime, clouds.cloudiness);
 
+	// Handle consumption simulations
+	studentConsumption.update(dt, simTime);
+	gamerConsumption.update(dt, simTime);
+	elderConsumption.update(dt, simTime);
+	svenssonConsumption.update(dt, simTime);
+
+	// Store current production in Watts in a global object
 	powerProduction.totalSolar = solarPanelModel.p;
 	powerProduction.totalWater = waterPlantModel.p;
 	powerProduction.totalWind = windmillModels.reduce(
 		(total, current) => total + current.p,
 		0
 	);
+}
+
+function handleParticleStreams() {
+	for (particleStream of Object.values(productionParticles)) {
+		particleStream.update(dt);
+	}
+
+	for (particleStream of Object.values(consumptionParticles)) {
+		particleStream.update(dt);
+	}
 }

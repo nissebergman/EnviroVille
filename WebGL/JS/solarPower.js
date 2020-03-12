@@ -10,20 +10,32 @@ const noon = 12;
 const sunSet = 18;
 
 class SolarPanel {
-	constructor(solver) {
+	constructor(particleThreshold, solver) {
 		this.irradiation = 0;
 		this.p = 0;
 		this.energy = 0;
 
 		this.solver = solver;
+		this.particleThreshold = particleThreshold;
 	}
 
-	update(dt, simTime) {
+	connectParticleStream(particleStream) {
+		this.particleStream = particleStream;
+	}
+
+	update(dt, simTime, cloudiness) {
 		// TODO: Cloudiness
-		this.irradiation = this.calculateIrradiation(simTime);
-		this.p = (this.calculateIrradiation(simTime) * efficiency * numPanels)/1000;
+		this.irradiation = this.calculateIrradiation(simTime) * (1 - cloudiness);
+		this.p =
+			(this.calculateIrradiation(simTime) * efficiency * numPanels) / 1000;
 		this.energy = this.solver(this.energy, dt, this.p);
 
+		// Particle stream visualization
+		if (this.particleStream && this.energy >= this.particleThreshold) {
+			let toSpawn = Math.floor(this.energy / this.particleThreshold);
+			this.particleStream.queueParticleSpawns(toSpawn);
+			this.energy -= this.particleThreshold;
+		}
 	}
 
 	calculateIrradiation(simTime) {
@@ -48,5 +60,25 @@ class SolarPanel {
 
 	isAfternoon(simTime) {
 		return noon < simTime && simTime <= sunSet;
+	}
+}
+
+class Clouds {
+	constructor(maxClouds, speed) {
+		this.maxClouds = maxClouds;
+		this.speed = speed;
+
+		this.x = 0;
+		this.y = 0;
+
+		this.cloudiness = 0;
+	}
+
+	update(dt) {
+		this.x += dt * this.speed;
+		this.y += dt * this.speed;
+
+		this.cloudiness =
+			this.maxClouds + (1 - this.maxClouds) * noise.simplex2(this.x, this.y);
 	}
 }

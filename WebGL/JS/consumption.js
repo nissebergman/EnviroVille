@@ -1,17 +1,35 @@
 data = [{
 	type: "student",
-	morning: 8,
-	evening: 23,
-	night: 16 },
+	morning: 8/24,
+	evening: 23/24,
+	night: 16/24 },
 	{
 	type: "gamer",
-	morning: 12,
-	evening: 22,
-	night: 40
+	morning: 12/24,
+	evening: 22/24,
+	night: 40/24
+	},
+	{
+	type: "elder",
+	morning: 18/24,
+	evening: 18/24,
+	night: 7/24
+	},
+	{
+	type: "rich",
+	morning: 30/24,
+	evening: 50/24,
+	night: 30/24
+	},
+	{
+	type: "svensson",
+	morning: 19/24,
+	evening: 30/24,
+	night: 19/24
 	}];
 
 class Household  {
-	constructor(amount, type) {
+	constructor(type, amount) {
 		this.amount = amount;
 		this.type = type;
 		this.p = 0; //Consumption
