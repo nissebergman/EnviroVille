@@ -47,11 +47,11 @@ var waterPlantModel;
 var solarPanelModel;
 
 // Consumption models
-var studentConsumption = new Household("student", 1);
-var gamerConsumption = new Household("gamer", 1);
-var elderConsumption = new Household("elder", 1);
-var richConsumption = new Household("rich", 1);
-var svenssonConsumption = new Household("svensson", 1);
+var studentConsumption = new Household("student", 1, euler);
+var gamerConsumption = new Household("gamer", 1, euler);
+var elderConsumption = new Household("elder", 1, euler);
+var richConsumption = new Household("rich", 1, euler);
+var svenssonConsumption = new Household("svensson", 1, euler);
 
 // Objects for holding total production/consumption in Watts
 var powerProduction = {
@@ -76,8 +76,8 @@ const angleSpan = (2 * Math.PI) / 3;
 const valueSpan = 150e3;
 
 // Particle stream visualizations objects and properties
-const productionParticleColor = 0xaaff11;
-const consumptionParticleColor = 0xff8855;
+const productionParticleColor = 0x00ff55;
+const consumptionParticleColor = 0xffff00;
 
 var productionParticles = {};
 var consumptionParticles = {};
@@ -138,18 +138,43 @@ function init() {
 	productionParticles.windmills = new ParticleStream(
 		scene,
 		productionParticleColor,
-		0.008
+		0.02
 	);
 	productionParticles.waterPlant = new ParticleStream(
 		scene,
 		productionParticleColor,
-		0.008
+		0.02
 	);
 	productionParticles.solarPanels = new ParticleStream(
 		scene,
 		productionParticleColor,
-		0.005
+		0.015
 	);
+	consumptionParticles.student = new ParticleStream(
+		scene,
+		consumptionParticleColor,
+		0.015
+	)
+	consumptionParticles.gamer = new ParticleStream(
+		scene,
+		consumptionParticleColor,
+		0.015
+	)
+	consumptionParticles.rich = new ParticleStream(
+		scene,
+		consumptionParticleColor,
+		0.015
+	)
+	consumptionParticles.elder = new ParticleStream(
+		scene,
+		consumptionParticleColor,
+		0.015
+	)
+	consumptionParticles.svensson = new ParticleStream(
+		scene,
+		consumptionParticleColor,
+		0.015
+	)
 
 	renderer.shadowMap.enabled = true;
 	renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -229,8 +254,15 @@ function loadModels() {
 				child.receiveShadow = true;
 			}
 		});
+
+		// Handle particle stream
+		consumptionParticles.student.setEndPos(
+			houseStudent.children[0].position
+		);
+		studentConsumption.connectParticleStream(consumptionParticles.student);
+
 		scene.add(houseStudent);
-	});
+	}); 
 
 	// Gamer Jönnson
 	loader.load("Assets/Models/hus_GamerJon.gltf", function(gltf) {
@@ -242,6 +274,13 @@ function loadModels() {
 				child.receiveShadow = true;
 			}
 		});
+
+		// Handle particle stream
+		consumptionParticles.gamer.setEndPos(
+			houseGamer.children[0].position
+		);
+		gamerConsumption.connectParticleStream(consumptionParticles.gamer);
+
 		scene.add(houseGamer);
 	});
 
@@ -254,6 +293,13 @@ function loadModels() {
 				child.receiveShadow = true;
 			}
 		});
+
+		// Handle particle stream
+		consumptionParticles.rich.setEndPos(
+			houseRich.children[0].position
+		);
+		richConsumption.connectParticleStream(consumptionParticles.rich);
+
 		scene.add(houseRich);
 	});
 
@@ -266,6 +312,13 @@ function loadModels() {
 				child.receiveShadow = true;
 			}
 		});
+
+		// Handle particle stream
+		consumptionParticles.elder.setEndPos(
+			houseElder.children[0].position
+		);
+		elderConsumption.connectParticleStream(consumptionParticles.elder);
+
 		scene.add(houseElder);
 	});
 
@@ -278,6 +331,13 @@ function loadModels() {
 				child.receiveShadow = true;
 			}
 		});
+
+		// Handle particle stream
+		consumptionParticles.svensson.setEndPos(
+			houseSvensson.children[0].position
+		);
+		svenssonConsumption.connectParticleStream(consumptionParticles.svensson);
+
 		scene.add(houseSvensson);
 	});
 
@@ -317,7 +377,7 @@ function loadModels() {
 
 		// Handle particle stream
 		productionParticles.solarPanels.setStartPos(
-			SolarPanels.children[0].position
+			SolarPanels.children[5].position
 		);
 		solarPanelModel.connectParticleStream(productionParticles.solarPanels);
 
@@ -339,6 +399,11 @@ function loadModels() {
 		// Connect as endPos
 		for (particleStream of Object.values(productionParticles)) {
 			particleStream.setEndPos(gauge.children[0].position);
+		}
+
+		// Connect as startPos
+		for (particleStream of Object.values(consumptionParticles)) {
+			particleStream.setStartPos(gauge.children[0].position);
 		}
 
 		scene.add(gauge);
@@ -569,8 +634,6 @@ function handleSimulationUpdates() {
 	for (consumed of Object.values(powerConsumption)) {
 		powerResult -= consumed;
 	}
-
-	console.log(`Power result: ${powerResult}W`);
 }
 
 function handleParticleStreams() {
