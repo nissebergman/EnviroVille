@@ -5,6 +5,23 @@ body {
 	box-sizing: border-box;
 }
 
+#houseInfo {
+	position: fixed;
+	top: 50vw;
+	left: 5vw;
+	min-width:100px;
+	text-align:center;
+	padding: 5px 12px;
+	font-family: monospace;
+	background: lightgrey;
+	border: 2px solid black;
+	box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.5);
+	transition: opacity 0.2s linear;
+	border-radius: 3px;
+	display: none;
+	z-index: 1000;
+}
+
 .graphs {
 	transition: opacity .5s ease-in-out;
 	opacity: 0.2;

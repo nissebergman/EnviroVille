@@ -65,6 +65,10 @@ const consumptionParticleColor = 0xff8855;
 var productionParticles = {};
 var consumptionParticles = {};
 
+// Hover
+
+var tooltipEnabledObjects = [];
+
 // Colors
 // const skyColors = [
 //     {
@@ -156,6 +160,7 @@ function init() {
 	window.addEventListener("resize", resizeRenderer);
 
 	// Start animation loop
+
 	requestAnimationFrame(animate);
 }
 
@@ -213,6 +218,7 @@ function loadModels() {
 			}
 		});
 		scene.add(houseStudent);
+		tooltipEnabledObjects.push(houseStudent);
 	});
 
 	// Gamer Jönnson
@@ -226,6 +232,7 @@ function loadModels() {
 			}
 		});
 		scene.add(houseGamer);
+		tooltipEnabledObjects.push(houseGamer);
 	});
 
 	// Familjen Rik
@@ -238,6 +245,7 @@ function loadModels() {
 			}
 		});
 		scene.add(houseRich);
+		tooltipEnabledObjects.push(houseRich);
 	});
 
 	// Ensamma Agneta
@@ -250,6 +258,7 @@ function loadModels() {
 			}
 		});
 		scene.add(houseElder);
+		tooltipEnabledObjects.push(houseElder);
 	});
 
 	// Familjen Svensson
@@ -262,6 +271,7 @@ function loadModels() {
 			}
 		});
 		scene.add(houseSvensson);
+		tooltipEnabledObjects.push(houseSvensson);
 	});
 
 	// Windmills
