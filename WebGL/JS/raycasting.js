@@ -10,7 +10,7 @@ var updateTooltip;
 // Calculate mouse position
 function onMouseMove(event) {
 	var divElement = $("#houseInfo");
-	event.preventDefault();
+	//event.preventDefault();
 	mouse.x = (event.clientX / window.innerWidth ) * 2 - 1;
 	mouse.y = - (event.clientY / window.innerHeight ) * 2 + 1;
 	tooltipx = event.pageX;

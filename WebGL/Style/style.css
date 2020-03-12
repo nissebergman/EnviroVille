@@ -5,6 +5,27 @@ body {
 	box-sizing: border-box;
 }
 
+#sliderContainer {
+	position: fixed;
+	width: 130px;
+	height:40px;
+	top: 210px;
+	left: 2px;
+	padding-top: 10px;
+	z-index: 1000;
+	color: tomato;
+	text-align: center;
+	font-family: monospace;
+	font-size: 20px;
+
+}
+
+#householdSlider {
+	position: fixed;
+	top:300px;
+	z-index: 1000;
+}
+
 #houseInfo {
 	position: fixed;
 	top: 50vw;

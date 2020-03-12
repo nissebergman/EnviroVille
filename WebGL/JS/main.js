@@ -5,8 +5,13 @@ var scene, camera, renderer, controls;
 var lastTime = 0;
 var pageHasGraph = 0;
 var graphCounter = 1;
-var mixer;
-var clock = new THREE.Clock();
+
+var householdSlider = document.getElementById("householdSlider");
+var sliderContainer = $("#sliderContainer");
+var sliderText = "Totalt antal hus: ";
+sliderContainer.html(sliderText + householdSlider.value*5);
+
+
 
 
 var dt = 0;
@@ -49,11 +54,11 @@ var waterPlantModel;
 var solarPanelModel;
 
 // Consumption models
-var studentConsumption = new Household("Student", 50, euler);
-var gamerConsumption = new Household("Gamer", 50, euler);
-var elderConsumption = new Household("Pensionär", 50, euler);
-var richConsumption = new Household("Rik", 50, euler);
-var svenssonConsumption = new Household("Medelsvensson", 50, euler);
+var studentConsumption = new Household("Student", 20, euler);
+var gamerConsumption = new Household("Gamer", 20, euler);
+var elderConsumption = new Household("Pensionär", 20, euler);
+var richConsumption = new Household("Rik", 20, euler);
+var svenssonConsumption = new Household("Medelsvensson", 20, euler);
 
 // Objects for holding total production/consumption in Watts
 var powerProduction = {
@@ -188,6 +193,7 @@ function init() {
 	renderer.shadowMap.enabled = true;
 	renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 	renderer.outputEncoding = THREE.sRGBEncoding;
+	renderer.setPixelRatio(1.5);
 
 	scene.background = new THREE.Color("skyblue");
 
@@ -441,8 +447,6 @@ function loadModels() {
 	// Water
 	loader.load("Assets/Models/wateranimation.gltf", function(gltf) {
 		water = gltf.scene;
-		mixer = new THREE.AnimationMixer(gltf.scene);
-		gltf.animations.forEach((clip) => {mixer.clipAction(clip).play();});
 		water.traverse(function(child) {
 			if (child.isMesh) {
 				child.castShadow = false;
@@ -512,9 +516,6 @@ function setupGeometry() {
 /////////////////////////
 function animate(time) {
 
-	if(water){
-	mixer.update(dt);
-	}
 	// Time is passed in milliseconds, calculate delta time
 	let timeNow = time / 1000;
 	dt = timeNow - lastTime;
@@ -556,6 +557,17 @@ function animate(time) {
 	graphContext.beginPath();
 	graphContext.fill();
 
+	// Update household slider
+	householdSlider.oninput = function() {
+	studentConsumption.amount = this.value;
+	gamerConsumption.amount = this.value;
+	elderConsumption.amount = this.value;
+	richConsumption.amount = this.value;
+	svenssonConsumption.amount = this.value;
+	sliderContainer.html(sliderText + this.value*5);
+	}
+
+	// Update raycaster
 	updateRaycaster();
 
 	renderer.render(scene, camera);

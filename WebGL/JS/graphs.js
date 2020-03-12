@@ -66,12 +66,12 @@ function updateGraphs(graphCounter) {
 	switch (graphCounter) {
 		case 1:
 			windStrengthGraph.update(wind.windSpeed, 20);
-			windElectricityGraph.update(powerProduction.totalWind, Math.pow(10, 9));
+			windElectricityGraph.update(powerProduction.totalWind, Math.pow(10, 6));
 			break;
 
 		case 2:
 			sunIntensityGraph.update(solarPanelModel.irradiation, 2000);
-			sunElectricityGraph.update(powerProduction.totalSolar, Math.pow(10, 8));
+			sunElectricityGraph.update(powerProduction.totalSolar, Math.pow(10, 1));
 			break;
 		case 3:
 			waterElectricityGraph.update(powerProduction.totalWater, Math.pow(10, 7));

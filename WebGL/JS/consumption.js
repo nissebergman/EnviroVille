@@ -31,7 +31,7 @@ data = [
 	}
 ];
 
-const householdParticleThreshold = 1;
+const householdParticleThreshold = 10;
 
 class Household {
 	constructor(type, amount, solver) {

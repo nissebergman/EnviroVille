@@ -49,7 +49,7 @@ class WindMill {
 		this.theta = this.solver(this.theta, dt, this.omega);
 
 		// Do generator updates
-		this.i = torque / K1;
+		this.i = windTorque / K1;
 		this.u = R * this.i + K2 * this.omega;
 		this.p = (this.u * this.i) / 1000;
 		this.energy = this.solver(this.energy, dt, this.p);
